@@ -265,3 +265,4 @@ gradle-app.setting
 # Custom
 !.vscode/java.prefs
 bin/
+SPEC.md
