@@ -1,0 +1,35 @@
+plugins {
+    // Shared convention plugins for the Java toolchain, static analysis, and test lifecycle.
+    id 'lnu.java-conventions'
+    id 'lnu.quality-conventions'
+    id 'lnu.testing-conventions'
+
+    // Packages the module as a reusable library.
+    id 'java-library'
+
+    // Lets JitPack build and serve the library straight from GitHub.
+    id 'maven-publish'
+}
+
+group = 'se.lnu.rm222xi'
+version = '1.0.0'
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+dependencies {
+    testImplementation libs.junit.jupiter.api
+    testRuntimeOnly    libs.junit.jupiter.engine
+    testRuntimeOnly    "org.junit.platform:junit-platform-launcher"
+}
+
+publishing {
+    publications {
+        library(MavenPublication) {
+            artifactId = 'svg-charts'
+            from components.java
+        }
+    }
+}

@@ -15,9 +15,9 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = 'java-gradle-cli-template'
+rootProject.name = 'svg-charts'
 
-include("app")
+include("lib", "app")
 
 // Composite build: pulls in the custom build logic and convention plugins.
 includeBuild("build-logic")
