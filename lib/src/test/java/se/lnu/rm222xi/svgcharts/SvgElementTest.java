@@ -2,10 +2,7 @@ package se.lnu.rm222xi.svgcharts;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Locale;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("SvgElement")
@@ -74,55 +71,13 @@ class SvgElementTest {
     assertEquals("<svg><g><rect/></g></svg>", svg.toString());
   }
 
-  @Nested
-  @DisplayName("setAttribute(name, double)")
-  class NumericAttributeTest {
+  @Test
+  @DisplayName("should format numeric attributes with NumberFormatter")
+  void formatsNumericAttributes() {
+    SvgElement rect = new SvgElement("rect")
+        .setAttribute("x", 100.0)
+        .setAttribute("y", 12.3456);
 
-    private final Locale originalLocale = Locale.getDefault();
-
-    @AfterEach
-    void restoreLocale() {
-      Locale.setDefault(originalLocale);
-    }
-
-    @Test
-    @DisplayName("should write whole numbers without decimals")
-    void writesWholeNumbersWithoutDecimals() {
-      assertEquals("<rect x=\"100\"/>", new SvgElement("rect").setAttribute("x", 100.0).toString());
-    }
-
-    @Test
-    @DisplayName("should round to two decimals and remove trailing zeros")
-    void roundsAndRemovesTrailingZeros() {
-      SvgElement rect = new SvgElement("rect")
-          .setAttribute("x", 12.3456)
-          .setAttribute("y", 0.5);
-
-      assertEquals("<rect x=\"12.35\" y=\"0.5\"/>", rect.toString());
-    }
-
-    @Test
-    @DisplayName("should write zero and negative zero as 0")
-    void writesZeroAsZero() {
-      SvgElement rect = new SvgElement("rect")
-          .setAttribute("x", 0.0)
-          .setAttribute("y", -0.001);
-
-      assertEquals("<rect x=\"0\" y=\"0\"/>", rect.toString());
-    }
-
-    @Test
-    @DisplayName("should keep the minus sign on negative numbers")
-    void keepsMinusSign() {
-      assertEquals("<rect x=\"-2.5\"/>", new SvgElement("rect").setAttribute("x", -2.5).toString());
-    }
-
-    @Test
-    @DisplayName("should use a dot as decimal separator even with Swedish settings")
-    void usesDotWithSwedishLocale() {
-      Locale.setDefault(Locale.of("sv", "SE"));
-
-      assertEquals("<rect x=\"1.5\"/>", new SvgElement("rect").setAttribute("x", 1.5).toString());
-    }
+    assertEquals("<rect x=\"100\" y=\"12.35\"/>", rect.toString());
   }
 }

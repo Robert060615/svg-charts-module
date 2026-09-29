@@ -3,7 +3,6 @@ package se.lnu.rm222xi.svgcharts;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -16,6 +15,7 @@ class SvgElement {
   private final Map<String, String> attributes = new LinkedHashMap<>();
   private final List<SvgElement> children = new ArrayList<>();
   private final XmlEscaper escaper = new XmlEscaper();
+  private final NumberFormatter numberFormatter = new NumberFormatter();
   private String text = "";
 
   /**
@@ -44,7 +44,7 @@ class SvgElement {
    * @return this element, so calls can be chained
    */
   SvgElement setAttribute(String name, double value) {
-    return setAttribute(name, formatNumber(value));
+    return setAttribute(name, numberFormatter.format(value));
   }
 
   /**
@@ -101,14 +101,4 @@ class SvgElement {
     xml.append("</").append(tagName).append('>');
   }
 
-  private String formatNumber(double value) {
-    String formatted = String.format(Locale.ROOT, "%.2f", value);
-    while (formatted.endsWith("0")) {
-      formatted = formatted.substring(0, formatted.length() - 1);
-    }
-    if (formatted.endsWith(".")) {
-      formatted = formatted.substring(0, formatted.length() - 1);
-    }
-    return "-0".equals(formatted) ? "0" : formatted;
-  }
 }
