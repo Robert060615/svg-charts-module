@@ -1,16 +1,20 @@
 package se.lnu.rm222xi.svgcharts;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
- * A node in an SVG document: a tag name, attributes in insertion order and optional text. All
- * attribute values and text are escaped when the element is written as XML.
+ * A node in an SVG document: a tag name, attributes in insertion order, and text or child
+ * elements. All attribute values and text are escaped when the element is written as XML.
  */
 class SvgElement {
 
   private final String tagName;
   private final Map<String, String> attributes = new LinkedHashMap<>();
+  private final List<SvgElement> children = new ArrayList<>();
   private final XmlEscaper escaper = new XmlEscaper();
   private String text = "";
 
@@ -34,6 +38,16 @@ class SvgElement {
   }
 
   /**
+   * Sets a numeric attribute, rounded to at most two decimals and always written with a dot as the
+   * decimal separator, whatever the computer's language settings are.
+   *
+   * @return this element, so calls can be chained
+   */
+  SvgElement setAttribute(String name, double value) {
+    return setAttribute(name, formatNumber(value));
+  }
+
+  /**
    * Sets the text between the start and end tag.
    *
    * @return this element, so calls can be chained
@@ -44,13 +58,28 @@ class SvgElement {
   }
 
   /**
-   * Writes the element as XML.
+   * Places another element inside this one, after any children added earlier.
+   *
+   * @return this element, so calls can be chained
+   */
+  SvgElement addChild(SvgElement child) {
+    children.add(child);
+    return this;
+  }
+
+  /**
+   * Writes the element and everything inside it as XML.
    *
    * @return the XML markup
    */
   @Override
   public String toString() {
     StringBuilder xml = new StringBuilder();
+    appendTo(xml);
+    return xml.toString();
+  }
+
+  private void appendTo(StringBuilder xml) {
     xml.append('<').append(tagName);
     for (Map.Entry<String, String> attribute : attributes.entrySet()) {
       xml.append(' ')
@@ -60,13 +89,26 @@ class SvgElement {
           .append('"');
     }
 
-    if (text.isEmpty()) {
-      return xml.append("/>").toString();
+    if (text.isEmpty() && children.isEmpty()) {
+      xml.append("/>");
+      return;
     }
 
-    return xml.append('>')
-        .append(escaper.escape(text))
-        .append("</").append(tagName).append('>')
-        .toString();
+    xml.append('>').append(escaper.escape(text));
+    for (SvgElement child : children) {
+      child.appendTo(xml);
+    }
+    xml.append("</").append(tagName).append('>');
+  }
+
+  private String formatNumber(double value) {
+    String formatted = String.format(Locale.ROOT, "%.2f", value);
+    while (formatted.endsWith("0")) {
+      formatted = formatted.substring(0, formatted.length() - 1);
+    }
+    if (formatted.endsWith(".")) {
+      formatted = formatted.substring(0, formatted.length() - 1);
+    }
+    return "-0".equals(formatted) ? "0" : formatted;
   }
 }
