@@ -18,18 +18,31 @@ class TickGenerator {
    * @param targetTickCount the preferred number of ticks, at least 2
    */
   TickGenerator(int targetTickCount) {
+    if (targetTickCount < 2) {
+      throw new IllegalArgumentException(
+          "An axis needs at least 2 ticks, got " + targetTickCount);
+    }
     this.targetTickCount = targetTickCount;
   }
 
   /**
    * Returns the ticks for an axis that covers all values from min to max. The first tick is at or
-   * below min and the last tick is at or above max.
+   * below min and the last tick is at or above max. If min equals max, the axis is stretched to
+   * zero so that it still has a range to divide.
    *
    * @param min the smallest value on the axis
-   * @param max the largest value on the axis
+   * @param max the largest value on the axis, not less than min
    * @return the tick values in increasing order
    */
   List<Double> generateTicks(double min, double max) {
+    if (min > max) {
+      throw new IllegalArgumentException(
+          "min (" + min + ") must not be greater than max (" + max + ")");
+    }
+    if (min == max) {
+      return generateTicksForSingleValue(min);
+    }
+
     double step = calculateStep(min, max);
     double axisStart = Math.floor(min / step + TOLERANCE) * step;
     double axisEnd = Math.ceil(max / step - TOLERANCE) * step;
@@ -55,6 +68,16 @@ class TickGenerator {
     double magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
     double normalizedStep = roughStep / magnitude;
     return roundToNiceNumber(normalizedStep) * magnitude;
+  }
+
+  private List<Double> generateTicksForSingleValue(double value) {
+    if (value > 0) {
+      return generateTicks(0, value);
+    }
+    if (value < 0) {
+      return generateTicks(value, 0);
+    }
+    return generateTicks(0, 1);
   }
 
   private double roundToNiceNumber(double normalizedStep) {

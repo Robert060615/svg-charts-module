@@ -1,6 +1,7 @@
 package se.lnu.rm222xi.svgcharts;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -100,6 +101,48 @@ class TickGeneratorTest {
     @DisplayName("should not add an extra tick when min/step is slightly off a whole number")
     void handlesFloatingPointErrorAtBounds() {
       assertEquals(List.of(0.6, 0.8, 1.0, 1.2, 1.4), generator.generateTicks(0.6, 1.4));
+    }
+  }
+
+  @Nested
+  @DisplayName("edge cases")
+  class EdgeCaseTest {
+
+    @Test
+    @DisplayName("should handle an axis with only negative values")
+    void handlesOnlyNegativeValues() {
+      assertEquals(List.of(-100.0, -80.0, -60.0, -40.0, -20.0, 0.0),
+          generator.generateTicks(-87, -3));
+    }
+
+    @Test
+    @DisplayName("should stretch the axis down to zero when min equals a positive max")
+    void stretchesPositiveSingleValueToZero() {
+      assertEquals(List.of(0.0, 10.0, 20.0, 30.0, 40.0), generator.generateTicks(40, 40));
+    }
+
+    @Test
+    @DisplayName("should stretch the axis up to zero when min equals a negative max")
+    void stretchesNegativeSingleValueToZero() {
+      assertEquals(List.of(-40.0, -30.0, -20.0, -10.0, 0.0), generator.generateTicks(-40, -40));
+    }
+
+    @Test
+    @DisplayName("should give an axis from 0 to 1 when all values are zero")
+    void givesZeroToOneForOnlyZeros() {
+      assertEquals(List.of(0.0, 0.2, 0.4, 0.6, 0.8, 1.0), generator.generateTicks(0, 0));
+    }
+
+    @Test
+    @DisplayName("should throw when min is greater than max")
+    void throwsWhenMinIsGreaterThanMax() {
+      assertThrows(IllegalArgumentException.class, () -> generator.generateTicks(10, 5));
+    }
+
+    @Test
+    @DisplayName("should throw when fewer than 2 ticks are requested")
+    void throwsForTooFewTicks() {
+      assertThrows(IllegalArgumentException.class, () -> new TickGenerator(1));
     }
   }
 }
