@@ -1,5 +1,6 @@
 package se.lnu.rm222xi.svgcharts;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,6 +19,10 @@ public abstract class Chart {
   private static final int MARGIN_LEFT = 50;
   private static final int TITLE_BASELINE = 24;
   private static final int TITLE_FONT_SIZE = 16;
+  private static final int LABEL_FONT_SIZE = 12;
+  private static final int TICK_LABEL_GAP = 8;
+  private static final int CATEGORY_LABEL_OFFSET = 20;
+  private static final String GRID_COLOR = "#e0e0e0";
 
   private final ChartOptions options;
   private String title = "";
@@ -97,6 +102,8 @@ public abstract class Chart {
         .addChild(new SvgElement("title").setText(title))
         .addChild(createBackground())
         .addChild(createHeading())
+        .addChild(createValueAxis(ticks, verticalScale))
+        .addChild(createCategoryLabels())
         .addChild(drawData(verticalScale))
         .toString();
   }
@@ -111,6 +118,13 @@ public abstract class Chart {
    * Returns the highest value the y-axis must show.
    */
   abstract double axisMax();
+
+  /**
+   * Returns the x-coordinate where the value and label at the given index are placed.
+   *
+   * @param index the position in the list of values, starting at 0
+   */
+  abstract double horizontalPositionOf(int index);
 
   /**
    * Draws the data itself (bars, lines) inside the plot area. Each chart type decides how.
@@ -208,5 +222,54 @@ public abstract class Chart {
         .setAttribute("font-family", FONT_FAMILY)
         .setAttribute("font-size", TITLE_FONT_SIZE)
         .setText(title);
+  }
+
+  private SvgElement createValueAxis(List<Double> ticks, LinearScale verticalScale) {
+    SvgElement axis = createLabelGroup("end");
+    for (double tick : ticks) {
+      double y = verticalScale.toPixel(tick);
+      axis.addChild(createGridLine(y));
+      axis.addChild(createTickLabel(tick, y));
+    }
+    return axis;
+  }
+
+  private SvgElement createGridLine(double y) {
+    return new SvgElement("line")
+        .setAttribute("x1", plotLeft())
+        .setAttribute("y1", y)
+        .setAttribute("x2", plotRight())
+        .setAttribute("y2", y)
+        .setAttribute("stroke", GRID_COLOR);
+  }
+
+  private SvgElement createTickLabel(double tick, double y) {
+    return new SvgElement("text")
+        .setAttribute("x", plotLeft() - TICK_LABEL_GAP)
+        .setAttribute("y", y)
+        .setAttribute("dominant-baseline", "middle")
+        .setText(formatTick(tick));
+  }
+
+  private SvgElement createCategoryLabels() {
+    SvgElement labelGroup = createLabelGroup("middle");
+    for (int i = 0; i < labels.size(); i++) {
+      labelGroup.addChild(new SvgElement("text")
+          .setAttribute("x", horizontalPositionOf(i))
+          .setAttribute("y", plotBottom() + CATEGORY_LABEL_OFFSET)
+          .setText(labels.get(i)));
+    }
+    return labelGroup;
+  }
+
+  private SvgElement createLabelGroup(String textAnchor) {
+    return new SvgElement("g")
+        .setAttribute("font-family", FONT_FAMILY)
+        .setAttribute("font-size", LABEL_FONT_SIZE)
+        .setAttribute("text-anchor", textAnchor);
+  }
+
+  private String formatTick(double tick) {
+    return BigDecimal.valueOf(tick).stripTrailingZeros().toPlainString();
   }
 }

@@ -1,6 +1,7 @@
 package se.lnu.rm222xi.svgcharts;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,9 +35,18 @@ class ChartTest {
     }
 
     @Override
+    double horizontalPositionOf(int index) {
+      return plotLeft() + index * 10;
+    }
+
+    @Override
     SvgElement drawData(LinearScale verticalScale) {
       return new SvgElement("g").setAttribute("id", "minimal-data");
     }
+  }
+
+  private static int countOccurrences(String text, String part) {
+    return text.split(part, -1).length - 1;
   }
 
   @Test
@@ -227,6 +237,62 @@ class ChartTest {
       ChartDataException exception = assertThrows(ChartDataException.class, chart::toSvg);
 
       assertEquals("Expected 5 values to match labels, got 4", exception.getMessage());
+    }
+  }
+
+  @Nested
+  @DisplayName("axes")
+  class AxesTest {
+
+    @Test
+    @DisplayName("should draw one grid line and one label per tick")
+    void drawsGridLineAndLabelPerTick() {
+      chart.setValues(List.of(0.0, 87.0));
+
+      String svg = chart.toSvg();
+
+      assertEquals(6, countOccurrences(svg, "<line"));
+      assertTrue(svg.contains(">0</text>"));
+      assertTrue(svg.contains(">100</text>"));
+    }
+
+    @Test
+    @DisplayName("should write decimal ticks without floating point noise")
+    void writesDecimalTicksCleanly() {
+      chart.setValues(List.of(0.0, 1.0));
+
+      String svg = chart.toSvg();
+
+      assertTrue(svg.contains(">0.6</text>"));
+      assertFalse(svg.contains("0.6000"));
+    }
+
+    @Test
+    @DisplayName("should write large ticks without scientific notation")
+    void writesLargeTicksInFull() {
+      chart.setValues(List.of(0.0, 1_000_000.0));
+
+      assertTrue(chart.toSvg().contains(">1000000</text>"));
+    }
+
+    @Test
+    @DisplayName("should place the lowest tick at the bottom of the plot area")
+    void placesLowestTickAtBottom() {
+      chart.setValues(List.of(0.0, 87.0));
+
+      assertTrue(chart.toSvg().contains("y=\"360\" dominant-baseline=\"middle\">0</text>"));
+    }
+
+    @Test
+    @DisplayName("should write one escaped label per value under the plot area")
+    void writesCategoryLabels() {
+      chart.setLabels(List.of("Mån", "<&>"));
+      chart.setValues(List.of(1.0, 2.0));
+
+      String svg = chart.toSvg();
+
+      assertTrue(svg.contains(">Mån</text>"));
+      assertTrue(svg.contains(">&lt;&amp;&gt;</text>"));
     }
   }
 }
