@@ -2,6 +2,7 @@ package se.lnu.rm222xi.svgcharts;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,8 +24,18 @@ class ChartTest {
     }
 
     @Override
+    double axisMin() {
+      return minValue();
+    }
+
+    @Override
+    double axisMax() {
+      return maxValue();
+    }
+
+    @Override
     SvgElement drawData(LinearScale verticalScale) {
-      return new SvgElement("g");
+      return new SvgElement("g").setAttribute("id", "minimal-data");
     }
   }
 
@@ -131,6 +142,91 @@ class ChartTest {
 
       assertThrows(ChartDataException.class, () -> chart.setValues(List.of(Double.NaN)));
       assertEquals(List.of(1.0, 2.0), chart.getValues());
+    }
+  }
+
+  @Nested
+  @DisplayName("toSvg()")
+  class ToSvgTest {
+
+    @Test
+    @DisplayName("should start with an svg element of the chosen size")
+    void startsWithSizedSvgElement() {
+      ChartOptions options = new ChartOptions();
+      options.setWidth(300);
+      options.setHeight(200);
+      Chart sizedChart = new MinimalChart(options);
+      sizedChart.setValues(List.of(1.0));
+
+      String svg = sizedChart.toSvg();
+
+      assertTrue(svg.startsWith("<svg xmlns=\"http://www.w3.org/2000/svg\""));
+      assertTrue(svg.contains("width=\"300\" height=\"200\" viewBox=\"0 0 300 200\""));
+    }
+
+    @Test
+    @DisplayName("should contain the title both as <title> and as visible text")
+    void containsTitleTwice() {
+      chart.setTitle("Temperatur i Lund");
+      chart.setValues(List.of(1.0));
+
+      String svg = chart.toSvg();
+
+      assertTrue(svg.contains("<title>Temperatur i Lund</title>"));
+      assertTrue(svg.contains(">Temperatur i Lund</text>"));
+    }
+
+    @Test
+    @DisplayName("should escape special characters in the title")
+    void escapesTitle() {
+      chart.setTitle("Salt & <peppar>");
+      chart.setValues(List.of(1.0));
+
+      assertTrue(chart.toSvg().contains("<title>Salt &amp; &lt;peppar&gt;</title>"));
+    }
+
+    @Test
+    @DisplayName("should include what the chart type draws")
+    void includesDrawnData() {
+      chart.setValues(List.of(1.0));
+
+      assertTrue(chart.toSvg().contains("<g id=\"minimal-data\"/>"));
+    }
+
+    @Test
+    @DisplayName("should give the same result when called twice")
+    void isRepeatable() {
+      chart.setValues(List.of(3.0, 7.0));
+
+      assertEquals(chart.toSvg(), chart.toSvg());
+    }
+
+    @Test
+    @DisplayName("should work without labels")
+    void worksWithoutLabels() {
+      chart.setValues(List.of(3.0, 7.0));
+
+      assertTrue(chart.toSvg().startsWith("<svg"));
+    }
+
+    @Test
+    @DisplayName("should throw when no values are set")
+    void throwsWithoutValues() {
+      ChartDataException exception = assertThrows(ChartDataException.class, chart::toSvg);
+
+      assertEquals("Cannot render chart without values. Call setValues() first.",
+          exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("should throw when the number of labels and values differ")
+    void throwsForMismatchedLabels() {
+      chart.setLabels(List.of("Mån", "Tis", "Ons", "Tor", "Fre"));
+      chart.setValues(List.of(1.0, 2.0, 3.0, 4.0));
+
+      ChartDataException exception = assertThrows(ChartDataException.class, chart::toSvg);
+
+      assertEquals("Expected 5 values to match labels, got 4", exception.getMessage());
     }
   }
 }

@@ -1,5 +1,6 @@
 package se.lnu.rm222xi.svgcharts;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -7,6 +8,16 @@ import java.util.List;
  * they are set. Use {@link BarChart} or {@link LineChart} to create a chart.
  */
 public abstract class Chart {
+
+  static final String FONT_FAMILY = "sans-serif";
+
+  private static final int TARGET_TICK_COUNT = 5;
+  private static final int MARGIN_TOP = 40;
+  private static final int MARGIN_RIGHT = 20;
+  private static final int MARGIN_BOTTOM = 40;
+  private static final int MARGIN_LEFT = 50;
+  private static final int TITLE_BASELINE = 24;
+  private static final int TITLE_FONT_SIZE = 16;
 
   private final ChartOptions options;
   private String title = "";
@@ -69,12 +80,69 @@ public abstract class Chart {
   }
 
   /**
+   * Draws the chart as a complete SVG document. Calling it does not change the chart, so calling it
+   * twice gives the same result.
+   *
+   * @return the SVG markup, ready to be saved as a .svg file or put inside an HTML page
+   * @throws ChartDataException if no values are set, or labels are set but their number differs
+   *     from the number of values
+   */
+  public String toSvg() {
+    requireRenderableData();
+    List<Double> ticks = new TickGenerator(TARGET_TICK_COUNT).generateTicks(axisMin(), axisMax());
+    LinearScale verticalScale =
+        new LinearScale(ticks.getFirst(), ticks.getLast(), plotBottom(), plotTop());
+
+    return createRoot()
+        .addChild(new SvgElement("title").setText(title))
+        .addChild(createBackground())
+        .addChild(createHeading())
+        .addChild(drawData(verticalScale))
+        .toString();
+  }
+
+  /**
+   * Returns the lowest value the y-axis must show. Each chart type decides, for example whether
+   * zero must be included.
+   */
+  abstract double axisMin();
+
+  /**
+   * Returns the highest value the y-axis must show.
+   */
+  abstract double axisMax();
+
+  /**
    * Draws the data itself (bars, lines) inside the plot area. Each chart type decides how.
    *
    * @param verticalScale converts a value to its y-coordinate
    * @return an element containing everything the chart type draws
    */
   abstract SvgElement drawData(LinearScale verticalScale);
+
+  double minValue() {
+    return Collections.min(values);
+  }
+
+  double maxValue() {
+    return Collections.max(values);
+  }
+
+  double plotLeft() {
+    return MARGIN_LEFT;
+  }
+
+  double plotRight() {
+    return options.getWidth() - MARGIN_RIGHT;
+  }
+
+  double plotTop() {
+    return MARGIN_TOP;
+  }
+
+  double plotBottom() {
+    return options.getHeight() - MARGIN_BOTTOM;
+  }
 
   ChartOptions getOptions() {
     return options;
@@ -102,5 +170,43 @@ public abstract class Chart {
       }
     }
     return List.copyOf(items);
+  }
+
+  private void requireRenderableData() {
+    if (values.isEmpty()) {
+      throw new ChartDataException("Cannot render chart without values. Call setValues() first.");
+    }
+    if (!labels.isEmpty() && labels.size() != values.size()) {
+      throw new ChartDataException(
+          "Expected " + labels.size() + " values to match labels, got " + values.size());
+    }
+  }
+
+  private SvgElement createRoot() {
+    int width = options.getWidth();
+    int height = options.getHeight();
+    return new SvgElement("svg")
+        .setAttribute("xmlns", "http://www.w3.org/2000/svg")
+        .setAttribute("width", width)
+        .setAttribute("height", height)
+        .setAttribute("viewBox", "0 0 " + width + " " + height)
+        .setAttribute("role", "img");
+  }
+
+  private SvgElement createBackground() {
+    return new SvgElement("rect")
+        .setAttribute("width", options.getWidth())
+        .setAttribute("height", options.getHeight())
+        .setAttribute("fill", "#ffffff");
+  }
+
+  private SvgElement createHeading() {
+    return new SvgElement("text")
+        .setAttribute("x", options.getWidth() / 2.0)
+        .setAttribute("y", TITLE_BASELINE)
+        .setAttribute("text-anchor", "middle")
+        .setAttribute("font-family", FONT_FAMILY)
+        .setAttribute("font-size", TITLE_FONT_SIZE)
+        .setText(title);
   }
 }
