@@ -1,219 +1,261 @@
-# Java (Gradle) CLI Template
+# svg-charts
 
-Welcome to the **1dv610** Java Command-Line Interface (CLI) template. This repository serves as a
-clean, pre-configured boilerplate for building robust Java console applications with modern tools
-and best practices.
+A small Java library that turns a list of numbers into a bar chart or line chart, returned as an
+SVG string. It has no dependencies, and the axes get readable steps automatically (0, 5, 10, 15
+instead of 0, 4.5, 9, 13.5).
 
-## 🚀 Features
+<p>
+  <img src="docs/bar-chart.svg" alt="Bar chart of temperatures in Lund, Monday to Friday" width="48%">
+  <img src="docs/line-chart.svg" alt="Line chart of a share price, January to June" width="48%">
+</p>
 
-- **Gradle Build:** Wrapper scripts included — no local Gradle installation required.
-- **Application Plugin:** `./gradlew run` builds and runs the CLI in one step.
-- **Unit Testing:** Pre-configured with [JUnit 5](https://junit.org/junit5/).
-- **Code Quality:** [Checkstyle](https://checkstyle.org) (Google Java Style) and
-  [PMD](https://pmd.github.io) static analysis, with a custom summary reporter and a build-failing
-  quality gate.
-- **Build Logic:** Composite build with reusable convention plugins
-  (`build-logic/`), keeping `app/build.gradle` minimal.
-- **IDE Support:** Pre-configured for Visual Studio Code, including a debug configuration.
+```java
+BarChart chart = new BarChart();
+chart.setTitle("Temperatur i Lund");
+chart.setLabels(List.of("Mån", "Tis", "Ons", "Tor", "Fre"));
+chart.setValues(List.of(3.0, 1.5, -1.0, 2.0, 4.5));
 
----
-
-## 🛠️ Getting Started
-
-### Prerequisites
-
-Ensure you have a **JDK 25** (or compatible) and **Git** installed on your machine. The Gradle
-wrapper is included, so no separate Gradle installation is needed.
-
-### Installation & Project Setup
-
-Pick the flow that matches your situation.
-
-#### A. Starting from scratch (no repository yet) — recommended
-
-Use GitHub's built-in template flow — no git commands needed to get a clean, single-commit history:
-
-1. On GitHub, open this template repository and click **Use this template → Create a new repository**.
-2. Clone your new repository and move into it:
-
-   ```bash
-   git clone <your-newly-created-repository-url>
-   cd <your-repository-name>
-   ```
-
-3. Build the project (also verifies your JDK setup):
-
-   ```bash
-   ./gradlew build
-   ```
-
-GitHub gives your new repository its own single commit copied from this template — no shared
-history, nothing to merge or squash.
-
-> **Note:** This requires the template repository to have **Template repository** enabled under
-> its GitHub Settings → General. If the "Use this template" button isn't available, use flow B
-> instead.
-
-#### B. Importing into an existing repository (empty or not)
-
-Use this flow if you already have a repository — e.g. one provisioned by GitHub Classroom — that
-you can't or don't want to recreate from a template.
-
-1. Clone your existing repository and move into it:
-
-   ```bash
-   git clone <your-existing-repository-url>
-   cd <your-repository-name>
-   ```
-
-2. If the repository has no commits yet, create an empty initial commit:
-
-   ```bash
-   git commit --allow-empty -m "Initial commit"
-   ```
-
-   _Note: This step is required for a genuinely empty repository. A branch with zero commits has
-   nothing for `--squash` to diff against, so `git pull --squash` silently falls back to a plain
-   fast-forward — it imports this template's entire internal commit history unmodified instead of
-   collapsing it into one clean commit. An empty commit gives `--squash` a (empty) tree to compare
-   against, so it behaves as intended. Skip this step if the repository already has commits (e.g.
-   an auto-generated README)._
-
-3. **Pull and squash the boilerplate code** from this template repository into your branch:
-
-   ```bash
-   git pull git@github.com:1dv610/java-gradle-cli-template.git main --squash --allow-unrelated-histories
-   ```
-
-   _Note: Using `--squash` ensures that the boilerplate's internal development history is collapsed
-   into a single, clean starting point in your repository. If your repository already had files
-   (e.g. GitHub auto-created a README or `.gitignore`), this will report a conflict on those files —
-   resolve it by taking the template's version: `git checkout --theirs <file> && git add <file>`._
-
-4. **Commit the imported files** to finalize the import of the boilerplate:
-
-   ```bash
-   git commit -m "Initial commit from boilerplate"
-   ```
-
-5. **Build the project** to verify your JDK setup:
-
-   ```bash
-   ./gradlew build
-   ```
-
-6. **Push the clean boilerplate setup** up to your own GitHub repository:
-  
-   ```bash
-   git push origin main
-   ```
-
----
-
-## 💻 Available Gradle Tasks
-
-### Running the Application
-
-Builds and runs the main console application entry point (`App.java`), optionally passing a name
-as the first argument:
-
-```bash
-./gradlew run -q
-./gradlew run -q --args="Ada Lovelace"
+String svg = chart.toSvg();
 ```
 
-_Note: Rename the `se.lnu.cli` package (and `group`/`mainClass` in `app/build.gradle`) to match
-your own project when adapting this template._
+## What it does
 
-### Building
+- Draws **bar charts** and **line charts** from one series of numbers.
+- Chooses **readable axis steps** automatically: steps are always 1, 2 or 5 times a power of ten.
+- Handles **negative values** (bars grow downwards from zero) and edge cases such as all values
+  being equal, a single value or very small decimals.
+- Returns a **plain SVG string** that you can put straight into an HTML page, save as a `.svg` file
+  or send from a web server.
+- **Escapes text** in titles and labels, so characters like `<`, `&` and `"` cannot break the SVG.
+- Writes numbers with a **decimal dot on every computer**, also when the default language uses a
+  decimal comma (for example Swedish).
+- Adds an **accessible title** (`<title>` and `role="img"`) that screen readers read aloud.
+- Fails early with a **clear error message** when the input is invalid.
 
-Compiles and packages the application:
+## What it does not do
 
-```bash
-./gradlew build
+- Several series in one chart, legends, stacked bars or pie charts.
+- Interactivity, animations or tooltips.
+- Rendering to PNG or other image formats.
+- Reading data from files, CSV or databases.
+- Shortening long labels or long numbers. See [Known limitations](#known-limitations).
+
+## Requirements
+
+- **JDK 25** or later.
+- No other dependencies.
+
+## Installation
+
+### With Gradle via JitPack
+
+Add the JitPack repository to `settings.gradle`:
+
+```groovy
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
 ```
 
-### Running Tests
+Add the dependency to `build.gradle`:
 
-```bash
-./gradlew test
+```groovy
+dependencies {
+    implementation 'com.github.Robert060615.svg-charts-module:svg-charts:v1.0.0'
+}
 ```
 
-A human-readable test summary is printed to the console after each run and saved to
-`app/build/reports/test-summary.log`.
+### With Maven via JitPack
 
-### Code Quality
+```xml
+<repositories>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
 
-Run Checkstyle and PMD with the aggregated summary:
-
-```bash
-./gradlew checkstyleMain pmdMain printCodeQualitySummary
+<dependency>
+  <groupId>com.github.Robert060615.svg-charts-module</groupId>
+  <artifactId>svg-charts</artifactId>
+  <version>v1.0.0</version>
+</dependency>
 ```
 
-Or run everything — tests and code quality — in one go:
+### As a jar file
+
+```bash
+git clone https://github.com/Robert060615/svg-charts-module.git
+cd svg-charts-module
+./gradlew :lib:jar
+```
+
+The jar ends up in `lib/build/libs/`. Add it to your project's classpath.
+
+## Usage
+
+Everything you need is in the package `se.lnu.rm222xi.svgcharts`:
+
+```java
+import java.util.List;
+import se.lnu.rm222xi.svgcharts.BarChart;
+import se.lnu.rm222xi.svgcharts.ChartOptions;
+import se.lnu.rm222xi.svgcharts.LineChart;
+```
+
+### Bar chart
+
+```java
+BarChart chart = new BarChart();
+chart.setTitle("Temperatur i Kiruna");
+chart.setLabels(List.of("Mån", "Tis", "Ons", "Tor", "Fre"));
+chart.setValues(List.of(4.0, -3.0, -8.5, 2.0, -1.0));
+
+String svg = chart.toSvg();
+```
+
+The y-axis of a bar chart always includes zero, since bars grow from the zero line.
+
+### Line chart
+
+```java
+LineChart chart = new LineChart();
+chart.setTitle("Aktiekurs");
+chart.setLabels(List.of("Jan", "Feb", "Mar", "Apr", "Maj", "Jun"));
+chart.setValues(List.of(102.5, 98.0, 110.25, 107.0, 115.5, 112.0));
+
+String svg = chart.toSvg();
+```
+
+The y-axis of a line chart follows the smallest and largest value, so it does not have to start at
+zero.
+
+### Size and color
+
+```java
+ChartOptions options = new ChartOptions();
+options.setWidth(800);
+options.setHeight(300);
+options.setColor("#e4572e");
+
+LineChart chart = new LineChart(options);
+```
+
+### Using the result
+
+Save it as a file:
+
+```java
+Files.writeString(Path.of("chart.svg"), chart.toSvg());
+```
+
+Or put it inside an HTML page:
+
+```java
+String html = "<html><body>" + chart.toSvg() + "</body></html>";
+```
+
+### Handling errors
+
+Invalid input throws `ChartDataException`, which is an `IllegalArgumentException`. The message
+tells exactly what is wrong:
+
+```java
+try {
+  chart.setLabels(List.of("Mån", "Tis", "Ons"));
+  chart.setValues(List.of(14.0, 16.0));
+  chart.toSvg();
+} catch (ChartDataException e) {
+  System.out.println(e.getMessage()); // Expected 3 values to match labels, got 2
+}
+```
+
+## API reference
+
+### `BarChart` and `LineChart`
+
+Both extend the abstract class `Chart` and have the same methods.
+
+| Method | Description |
+|---|---|
+| `new BarChart()` / `new LineChart()` | Creates a chart with the default options. |
+| `new BarChart(ChartOptions options)` / `new LineChart(ChartOptions options)` | Creates a chart with your own size and color. |
+| `void setTitle(String title)` | Heading shown at the top and read aloud by screen readers. Optional. |
+| `void setLabels(List<String> labels)` | One label per value, shown under the x-axis. Optional. |
+| `void setValues(List<Double> values)` | The numbers to draw, from left to right. Required. |
+| `String toSvg()` | Returns the chart as SVG. Does not change the chart, so you can call it several times. |
+
+The chart keeps its own copy of the lists, so changing your list afterwards does not change the
+chart.
+
+### `ChartOptions`
+
+| Method | Default | Allowed values |
+|---|---|---|
+| `void setWidth(int width)` | `600` | at least `100` |
+| `void setHeight(int height)` | `400` | at least `100` |
+| `void setColor(String color)` | `"#1f77b4"` (blue) | hex color with 3 or 6 digits, for example `"#f00"` or `"#ff0000"` |
+
+### `ChartDataException`
+
+Thrown at once by the method that received the invalid value:
+
+| Thrown by | When | Example message |
+|---|---|---|
+| `setWidth`, `setHeight` | Less than 100 | `Width must be at least 100 pixels, got 99` |
+| `setColor` | Not a hex color | `Color must be a hex color like "#f00" or "#1f77b4", got "red"` |
+| `setTitle` | `null` | `Title must not be null` |
+| `setLabels`, `setValues` | The list is `null` | `Values must not be null` |
+| `setLabels`, `setValues` | An item is `null` | `Value at index 2 is null` |
+| `setValues` | Infinity or NaN | `Value at index 1 must be a finite number, got Infinity` |
+| `toSvg` | No values set | `Cannot render chart without values. Call setValues() first.` |
+| `toSvg` | Labels set, but not one per value | `Expected 5 values to match labels, got 4` |
+
+## Known limitations
+
+- Long labels are not shortened and can overlap each other.
+- Very long numbers on the y-axis (such as `2400000`) can be cut off at the left edge.
+- At the minimum size of 100 × 100 the axis numbers overlap.
+
+These are shown in test cases VT10, VT12 and VT13 in the [test report](TEST_REPORT.md).
+
+## Running the tests
 
 ```bash
 ./gradlew check
 ```
 
-The build fails if any blocker violations (Checkstyle/PMD priority 1–3) or test failures are
-found. HTML reports are generated at `app/build/reports/checkstyle/main.html` and
-`app/build/reports/pmd/main.html`.
+This runs the unit tests with JUnit 5 and checks the code with Checkstyle and PMD. A summary is
+written to `lib/build/reports/test-summary.log`.
 
-### Cleaning
+To see the visual test cases:
 
 ```bash
-./gradlew clean
+./gradlew :app:run
 ```
 
----
+Then open `app/demo.html` in a web browser. What each chart should look like is described above
+it. The results are in [TEST_REPORT.md](TEST_REPORT.md).
 
-## Using with Visual Studio Code
+## Project structure
 
-### Debug Configuration
+| Folder | Content |
+|---|---|
+| `lib/` | The library itself: the code you use. |
+| `app/` | A test app that draws all visual test cases. Not part of the library. |
+| `docs/` | Example images for this README. |
 
-This template includes one debug configuration: **Gradle: Debug Application**. Set a breakpoint
-and press F5, or open the Run and Debug panel (Ctrl+Shift+D) and click start.
+## Contributing
 
-### Available Tasks
+Found a bug or have an idea? Open an
+[issue](https://github.com/Robert060615/svg-charts-module/issues) and describe what you did, what
+you expected and what happened instead. Pull requests are welcome. Please run `./gradlew check`
+before you open one.
 
-Quick access to Gradle tasks through the VS Code Tasks panel (Ctrl+Shift+P → "Tasks: Run Task"):
+## License
 
-| Task | Description |
-| ---- | ----------- |
-| `Gradle: run` | Run application |
-| `Gradle: run (debug)` | Run with debug agent on port 5005 |
-| `Gradle: build` | Build project |
-| `Gradle: clean` | Clean build directory |
-| `Gradle: check` | Tests + code quality |
-| `Gradle: test` | Run all tests |
-| `Gradle: code quality summary` | Checkstyle + PMD + summary |
-
----
-
-## 📁 Project Structure
-
-```text
-├── app/                                 # Main application module
-│   ├── src/
-│   │   ├── main/java/se/lnu/cli/        # Production code
-│   │   │   └── App.java
-│   │   └── test/java/se/lnu/cli/        # Unit tests, colocated with the code they cover
-│   │       └── AppTest.java
-│   └── build.gradle                     # App-specific build configuration
-├── build-logic/                         # Custom Gradle convention plugins
-├── config/                              # Checkstyle and PMD rule sets
-├── gradle/                              # Gradle wrapper and version catalog
-├── test/                                # Integration and system tests (higher-level / E2E flows)
-├── settings.gradle                      # Multi-project configuration
-├── gradle.properties                    # Gradle performance settings
-└── LICENSE                              # Unlicense (Public Domain dedication)
-```
-
----
-
-## ⚖️ License
-
-This project is released into the public domain under the **Unlicense**. You are free to copy,
-modify, publish, and distribute this boilerplate code in any way you see fit without any
-restrictions.
+Released into the public domain under [the Unlicense](LICENSE). You may use, change and share the
+code however you want.
