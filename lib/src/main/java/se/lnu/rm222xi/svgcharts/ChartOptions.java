@@ -15,6 +15,14 @@ public class ChartOptions {
   private String color = "#1f77b4";
 
   /**
+   * Creates options with the defaults: width 600, height 400 and color {@code "#1f77b4"}. Change
+   * them with the setters before passing the options to a chart.
+   */
+  public ChartOptions() {
+    // All fields already have their default values.
+  }
+
+  /**
    * Sets the width of the whole chart.
    *
    * @param width the width in pixels, at least 100
