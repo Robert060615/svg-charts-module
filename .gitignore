@@ -266,3 +266,4 @@ gradle-app.setting
 !.vscode/java.prefs
 bin/
 SPEC.md
+app/demo.html
