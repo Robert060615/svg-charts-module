@@ -217,7 +217,9 @@ Thrown at once by the method that received the invalid value:
 ## Known limitations
 
 - Long labels are not shortened and can overlap each other.
-- Very long numbers on the y-axis (such as `2400000`) can be cut off at the left edge.
+- Numbers with 7 or more digits on the y-axis (such as `1200000`) get their first digit cut off at
+  the left edge, since the left margin has a fixed width. Numbers with up to 6 digits are shown in
+  full.
 - At the minimum size of 100 × 100 the axis numbers overlap.
 
 These are shown in test cases VT10, VT12 and VT13 in the [test report](TEST_REPORT.md).
