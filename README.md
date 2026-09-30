@@ -64,7 +64,7 @@ Add the dependency to `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'com.github.Robert060615:svg-charts-module:v1.0.0'
+    implementation 'com.github.Robert060615:svg-charts-module:v1.0.1'
 }
 ```
 
@@ -81,7 +81,7 @@ dependencies {
 <dependency>
   <groupId>com.github.Robert060615</groupId>
   <artifactId>svg-charts-module</artifactId>
-  <version>v1.0.0</version>
+  <version>v1.0.1</version>
 </dependency>
 ```
 
