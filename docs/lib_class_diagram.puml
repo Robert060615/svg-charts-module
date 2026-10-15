@@ -1,0 +1,26 @@
+@startuml lib_class_diagram
+
+hide empty members
+hide circles
+
+class BarChart
+
+class Chart
+
+class ChartDataException
+
+class ChartOptions
+
+class LinearScale
+
+class LineChart
+
+class NumberFormatter
+
+class SvgElement
+
+class TickGenerator
+
+class XmlEscaper
+
+@enduml
