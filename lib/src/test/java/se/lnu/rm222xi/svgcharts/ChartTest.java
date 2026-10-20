@@ -60,11 +60,16 @@ class ChartTest {
   class SetTitleTest {
 
     @Test
-    @DisplayName("should store the title")
-    void storesTitle() {
-      chart.setTitle("Temperatur i Lund");
+    @DisplayName("should replace an earlier title")
+    void replacesEarlierTitle() {
+      chart.setTitle("Gammal rubrik");
+      chart.setTitle("Ny rubrik");
+      chart.setValues(List.of(1.0));
 
-      assertEquals("Temperatur i Lund", chart.getTitle());
+      String svg = chart.toSvg();
+
+      assertTrue(svg.contains("<title>Ny rubrik</title>"));
+      assertFalse(svg.contains("Gammal rubrik"));
     }
 
     @Test
@@ -79,11 +84,17 @@ class ChartTest {
   class SetLabelsTest {
 
     @Test
-    @DisplayName("should store the labels")
-    void storesLabels() {
-      chart.setLabels(List.of("Mån", "Tis"));
+    @DisplayName("should not be affected when the caller changes the original list afterwards")
+    void keepsOwnCopy() {
+      List<String> original = new ArrayList<>(List.of("Mån", "Tis"));
+      chart.setLabels(original);
+      chart.setValues(List.of(1.0, 2.0));
 
-      assertEquals(List.of("Mån", "Tis"), chart.getLabels());
+      original.set(0, "Ändrad");
+
+      String svg = chart.toSvg();
+      assertTrue(svg.contains(">Mån</text>"));
+      assertFalse(svg.contains("Ändrad"));
     }
 
     @Test

@@ -177,24 +177,6 @@ public abstract class Chart {
   }
 
   /**
-   * Returns the heading.
-   *
-   * @return the heading, empty if none is set
-   */
-  String getTitle() {
-    return title;
-  }
-
-  /**
-   * Returns the labels under the x-axis.
-   *
-   * @return an unmodifiable list, empty if no labels are set
-   */
-  List<String> getLabels() {
-    return labels;
-  }
-
-  /**
    * Returns the values to draw.
    *
    * @return an unmodifiable list, empty if no values are set

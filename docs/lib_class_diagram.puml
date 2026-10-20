@@ -36,8 +36,6 @@ abstract class Chart {
     ~verticalPositionOf(int index, LinearScale verticalScale): double
     ~getOptions(): ChartOptions
     ~getPlotArea(): PlotArea
-    ~getTitle(): String
-    ~getLabels(): List<String>
     ~getValues(): List<Double>
     -copyWithoutNulls<T>(List<T> items, String itemName): List<T>
     -requireFiniteValues(List<Double> values): void
