@@ -12,18 +12,12 @@ hide circles
 
 abstract class Chart {
     ~{static}FONT_FAMILY: String = "sans-serif"
-    -{static}TARGET_TICK_COUNT: int = 5
-    -{static}MARGIN_TOP: int = 40
-    -{static}MARGIN_RIGHT: int = 20
-    -{static}MARGIN_BOTTOM: int = 40
-    -{static}MARGIN_LEFT: int = 50
     -{static}TITLE_BASELINE: int = 24
     -{static}TITLE_FONT_SIZE: int = 16
-    -{static}LABEL_FONT_SIZE: int = 12
-    -{static}TICK_LABEL_GAP: int = 8
     -{static}CATEGORY_LABEL_OFFSET: int = 20
-    -{static}GRID_COLOR: String = "#e0e0e0"
     -options: ChartOptions
+    -plotArea: PlotArea
+    -labelStyle: LabelStyle
     -title: String = ""
     -labels: List<String>
     -values: List<Double>
@@ -39,25 +33,22 @@ abstract class Chart {
     ~{abstract}drawData(LinearScale verticalScale): SvgElement
     ~minValue(): double
     ~maxValue(): double
-    ~plotLeft(): double
-    ~plotRight(): double
-    ~plotTop(): double
-    ~plotBottom(): double
     ~getOptions(): ChartOptions
+    ~getPlotArea(): PlotArea
     ~getTitle(): String
     ~getLabels(): List<String>
     ~getValues(): List<Double>
     -copyWithoutNulls<T>(List<T> items, String itemName): List<T>
+    -requireFiniteValues(List<Double> values): void
     -requireRenderableData(): void
+    -requireValues(): void
+    -requireOneLabelPerValue(): void
+    -createValueAxis(): ValueAxis
     -createRoot(): SvgElement
     -createBackground(): SvgElement
     -createHeading(): SvgElement
-    -createValueAxis(List<Double> ticks, LinearScale verticalScale): SvgElement
-    -createGridLine(double y): SvgElement
-    -createTickLabel(double tick, double y): SvgElement
     -createCategoryLabels(): SvgElement
-    -createLabelGroup(String textAnchor): SvgElement
-    -formatTick(double tick): String
+    -createCategoryLabel(int index): SvgElement
 }
 
 class BarChart {
@@ -69,7 +60,7 @@ class BarChart {
     ~axisMax(): double
     ~horizontalPositionOf(int index): double
     ~drawData(LinearScale verticalScale): SvgElement
-    -createBar(double centerX, double valueY, double zeroLineY): SvgElement
+    -createBar(int index, LinearScale verticalScale): SvgElement
     -categoryWidth(): double
 }
 
@@ -85,6 +76,7 @@ class LineChart {
     ~horizontalPositionOf(int index): double
     ~drawData(LinearScale verticalScale): SvgElement
     -createLine(LinearScale verticalScale): SvgElement
+    -createPathData(LinearScale verticalScale): String
     -createPoint(int index, LinearScale verticalScale): SvgElement
 }
 
@@ -103,6 +95,8 @@ class ChartOptions {
     ~getColor(): String
     -requireMinimumSize(String dimension, int size): int
     -isHexColor(String color): boolean
+    -hasHexColorLength(String color): boolean
+    -hasOnlyHexDigitsAfterHash(String color): boolean
 }
 
 class ChartDataException {
@@ -113,6 +107,45 @@ class ChartDataException {
 
 class IllegalArgumentException
 
+class PlotArea {
+    -{static}MARGIN_TOP: int = 40
+    -{static}MARGIN_RIGHT: int = 20
+    -{static}MARGIN_BOTTOM: int = 40
+    -{static}MARGIN_LEFT: int = 50
+    -options: ChartOptions
+
+    ~PlotArea(ChartOptions options)
+    ~left(): double
+    ~right(): double
+    ~top(): double
+    ~bottom(): double
+    ~width(): double
+}
+
+class ValueAxis {
+    -{static}TARGET_TICK_COUNT: int = 5
+    -{static}TICK_LABEL_GAP: int = 8
+    -{static}GRID_COLOR: String = "#e0e0e0"
+    -plotArea: PlotArea
+    -ticks: List<Double>
+    -scale: LinearScale
+    -labelStyle: LabelStyle
+
+    ~ValueAxis(Interval dataRange, PlotArea plotArea)
+    ~scale(): LinearScale
+    ~toSvgElement(): SvgElement
+    -createScale(): LinearScale
+    -createGridLine(double y): SvgElement
+    -createTickLabel(double tick, double y): SvgElement
+    -formatTick(double tick): String
+}
+
+class LabelStyle {
+    -{static}FONT_SIZE: int = 12
+
+    ~createGroup(String textAnchor): SvgElement
+}
+
 class TickGenerator {
     -{static}TOLERANCE: double = 1e-9
     -targetTickCount: int
@@ -120,19 +153,34 @@ class TickGenerator {
     ~TickGenerator(int targetTickCount)
     ~generateTicks(double min, double max): List<Double>
     ~calculateStep(double min, double max): double
+    -requireMinNotGreaterThanMax(double min, double max): void
+    -generateTicksForRange(double min, double max): List<Double>
+    -roundDownToStep(double value, double step): double
+    -roundUpToStep(double value, double step): double
     -generateTicksForSingleValue(double value): List<Double>
     -roundToNiceNumber(double normalizedStep): double
     -roundToStepPrecision(double value, double step): double
 }
 
 class LinearScale {
-    -domainMin: double
-    -domainMax: double
-    -pixelStart: double
-    -pixelEnd: double
+    -domain: Interval
+    -pixels: Interval
 
-    ~LinearScale(double domainMin, double domainMax, double pixelStart, double pixelEnd)
+    ~LinearScale(Interval domain, Interval pixels)
     ~toPixel(double value): double
+}
+
+class Interval {
+    -start: double
+    -end: double
+
+    ~Interval(double start, double end)
+    ~start(): double
+    ~end(): double
+    ~length(): double
+    ~middle(): double
+    ~fractionOf(double value): double
+    ~valueAt(double fraction): double
 }
 
 class SvgElement {
@@ -150,6 +198,9 @@ class SvgElement {
     ~addChild(SvgElement child): SvgElement
     +toString(): String
     -appendTo(StringBuilder xml): void
+    -appendAttributes(StringBuilder xml): void
+    -hasNoContent(): boolean
+    -appendContent(StringBuilder xml): void
 }
 
 class XmlEscaper {
@@ -159,21 +210,38 @@ class XmlEscaper {
 
 class NumberFormatter {
     ~format(double value): String
+    -removeTrailingZeros(String decimalNumber): String
+    -removeSignFromNegativeZero(String number): String
 }
 
-Chart <|-- BarChart
-Chart <|-- LineChart
-IllegalArgumentException <|-- ChartDataException
+IllegalArgumentException <|-down- ChartDataException
+ChartOptions .left.> ChartDataException : throws
+Chart .up.> ChartDataException : throws
 
-Chart --> "1" ChartOptions : options
-Chart ..> TickGenerator : creates
-Chart ..> LinearScale : creates
-Chart ..> SvgElement : creates
-Chart ..> ChartDataException : throws
-ChartOptions ..> ChartDataException : throws
-LineChart --> "1" NumberFormatter : numberFormatter
+Chart -up-> "1" ChartOptions : options
+Chart -right-> "1" PlotArea : plotArea
+PlotArea -up-> "1" ChartOptions : options
+
+Chart <|-down- BarChart
+Chart <|-down- LineChart
+Chart .down.> SvgElement : creates
+Chart -down-> "1" LabelStyle : labelStyle
+Chart .down.> ValueAxis : creates
+
+ValueAxis -up-> "1" PlotArea : plotArea
+ValueAxis -down-> "1" LabelStyle : labelStyle
+ValueAxis .down.> SvgElement : creates
+ValueAxis -down-> "1" LinearScale : scale
+ValueAxis .down.> TickGenerator : creates
+
+LinearScale -down-> "1" Interval : domain
+LinearScale -down-> "1" Interval : pixels
+
+LabelStyle .down.> SvgElement : creates
+LineChart -down-> "1" NumberFormatter : numberFormatter
+
 SvgElement --> "*" SvgElement : children
-SvgElement --> "1" XmlEscaper : escaper
-SvgElement --> "1" NumberFormatter : numberFormatter
+SvgElement -down-> "1" XmlEscaper : escaper
+SvgElement -left-> "1" NumberFormatter : numberFormatter
 
 @enduml
