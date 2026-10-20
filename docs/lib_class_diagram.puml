@@ -10,6 +10,13 @@ skinparam ranksep 60
 hide empty members
 hide circles
 
+interface SvgChart <<interface>> {
+    +setTitle(String title): void
+    +setLabels(List<String> labels): void
+    +setValues(List<Double> values): void
+    +toSvg(): String
+}
+
 abstract class Chart {
     ~{static}FONT_FAMILY: String = "sans-serif"
     -{static}TITLE_BASELINE: int = 24
@@ -219,6 +226,7 @@ class NumberFormatter {
 }
 
 IllegalArgumentException <|-down- ChartDataException
+Chart .up.|> SvgChart
 ChartOptions .left.> ChartDataException : throws
 Chart .up.> ChartDataException : throws
 

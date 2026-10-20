@@ -5,7 +5,8 @@
  * <p>Create a {@link BarChart} or a {@link LineChart}, set its values and, if you like, a title
  * and one label per value, then call {@code toSvg()}. Size and color are set with
  * {@link ChartOptions}. Invalid input is reported right away with a {@link ChartDataException}
- * whose message tells what is wrong.
+ * whose message tells what is wrong. Everything you can do with a chart is listed in
+ * {@link SvgChart}.
  *
  * <pre>{@code
  * ChartOptions options = new ChartOptions();

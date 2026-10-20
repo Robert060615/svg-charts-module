@@ -16,6 +16,7 @@ import se.lnu.rm222xi.svgcharts.Chart;
 import se.lnu.rm222xi.svgcharts.ChartDataException;
 import se.lnu.rm222xi.svgcharts.ChartOptions;
 import se.lnu.rm222xi.svgcharts.LineChart;
+import se.lnu.rm222xi.svgcharts.SvgChart;
 
 /**
  * Tests that apply to every chart type. The class lies in its own package, so it can only use the
@@ -95,6 +96,21 @@ class PublicApiTest {
     for (Chart chart : createChartOfEveryType(new ChartOptions())) {
       assertThrows(ChartDataException.class, chart::toSvg);
       assertThrows(ChartDataException.class, () -> chart.setValues(null));
+    }
+  }
+
+  @Test
+  @DisplayName("should be usable through the SvgChart interface")
+  void isUsableThroughInterface() {
+    List<SvgChart> charts = List.of(new BarChart(), new LineChart());
+
+    for (SvgChart chart : charts) {
+      chart.setTitle("Temperatur i Lund");
+      chart.setLabels(List.of("Mån", "Tis"));
+      chart.setValues(List.of(14.0, -2.0));
+
+      assertTrue(chart.toSvg().contains("<title>Temperatur i Lund</title>"),
+          chart.getClass().getSimpleName());
     }
   }
 
