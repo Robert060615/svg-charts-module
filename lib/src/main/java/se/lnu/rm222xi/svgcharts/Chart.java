@@ -212,7 +212,9 @@ public abstract class Chart {
   }
 
   private LinearScale createVerticalScale(List<Double> ticks) {
-    return new LinearScale(ticks.getFirst(), ticks.getLast(), plotBottom(), plotTop());
+    Interval tickInterval = new Interval(ticks.getFirst(), ticks.getLast());
+    Interval pixelInterval = new Interval(plotBottom(), plotTop());
+    return new LinearScale(tickInterval, pixelInterval);
   }
 
   private SvgElement createRoot() {

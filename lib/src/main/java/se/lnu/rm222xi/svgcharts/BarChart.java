@@ -1,7 +1,5 @@
 package se.lnu.rm222xi.svgcharts;
 
-import java.util.List;
-
 /**
  * A chart with one vertical bar per value. Positive values grow upwards from the zero line and
  * negative values downwards, so the y-axis always includes zero.
@@ -53,16 +51,16 @@ public class BarChart extends Chart {
   @Override
   SvgElement drawData(LinearScale verticalScale) {
     SvgElement bars = new SvgElement("g").setAttribute("fill", getOptions().getColor());
-    double zeroLineY = verticalScale.toPixel(0);
-    List<Double> values = getValues();
-    for (int i = 0; i < values.size(); i++) {
-      double valueY = verticalScale.toPixel(values.get(i));
-      bars.addChild(createBar(horizontalPositionOf(i), valueY, zeroLineY));
+    for (int i = 0; i < getValues().size(); i++) {
+      bars.addChild(createBar(i, verticalScale));
     }
     return bars;
   }
 
-  private SvgElement createBar(double centerX, double valueY, double zeroLineY) {
+  private SvgElement createBar(int index, LinearScale verticalScale) {
+    double centerX = horizontalPositionOf(index);
+    double valueY = verticalScale.toPixel(getValues().get(index));
+    double zeroLineY = verticalScale.toPixel(0);
     double barWidth = categoryWidth() * BAR_WIDTH_RATIO;
     return new SvgElement("rect")
         .setAttribute("x", centerX - barWidth / 2)

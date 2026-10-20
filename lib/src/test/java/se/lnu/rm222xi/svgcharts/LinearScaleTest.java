@@ -15,16 +15,16 @@ class LinearScaleTest {
   @DisplayName("with a normal pixel range")
   class NormalRangeTest {
 
-    private final LinearScale scale = new LinearScale(0, 100, 50, 350);
+    private final LinearScale scale = new LinearScale(new Interval(0, 100), new Interval(50, 350));
 
     @Test
-    @DisplayName("should place domainMin at pixelStart")
+    @DisplayName("should place the start of the domain at the start of the pixels")
     void placesMinAtStart() {
       assertEquals(50, scale.toPixel(0), PRECISION);
     }
 
     @Test
-    @DisplayName("should place domainMax at pixelEnd")
+    @DisplayName("should place the end of the domain at the end of the pixels")
     void placesMaxAtEnd() {
       assertEquals(350, scale.toPixel(100), PRECISION);
     }
@@ -46,7 +46,7 @@ class LinearScaleTest {
   @DisplayName("with an inverted pixel range (y-axis)")
   class InvertedRangeTest {
 
-    private final LinearScale scale = new LinearScale(0, 100, 350, 50);
+    private final LinearScale scale = new LinearScale(new Interval(0, 100), new Interval(350, 50));
 
     @Test
     @DisplayName("should place domainMin at the bottom")
@@ -70,7 +70,7 @@ class LinearScaleTest {
   @Test
   @DisplayName("should work with a negative domain")
   void worksWithNegativeDomain() {
-    LinearScale scale = new LinearScale(-100, 0, 0, 200);
+    LinearScale scale = new LinearScale(new Interval(-100, 0), new Interval(0, 200));
 
     assertEquals(100, scale.toPixel(-50), PRECISION);
   }
@@ -78,7 +78,7 @@ class LinearScaleTest {
   @Test
   @DisplayName("should place every value in the middle when min equals max")
   void placesValueInMiddleWhenMinEqualsMax() {
-    LinearScale scale = new LinearScale(40, 40, 0, 200);
+    LinearScale scale = new LinearScale(new Interval(40, 40), new Interval(0, 200));
 
     assertEquals(100, scale.toPixel(40), PRECISION);
   }
