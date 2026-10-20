@@ -131,7 +131,9 @@ class VisualTestCases {
     }
     Chart chart = withData(new BarChart(), "40 värden utan etiketter", List.of(), values);
     page.addTestCase("VT11 – Många värden utan etiketter",
-        "40 smala staplar i en vågform, både över och under noll. Inga etiketter under.", chart);
+        "40 värden i en vågform, både över och under noll. Det första värdet är 0 och får "
+            + "därför ingen höjd, så 39 smala staplar syns. Inga etiketter under.",
+        chart);
   }
 
   private void addLargeValues() {

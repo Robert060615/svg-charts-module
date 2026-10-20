@@ -47,7 +47,8 @@ under its heading.
 - **Unit tests: 125 of 125 passed.**
 - **Visual tests: 10 of 13 passed.** VT10, VT12 and VT13 show known limitations that are
   described in the [README](README.md#known-limitations). The charts look exactly the same as in
-  version 1.0.1: the generated `app/demo.html` is byte for byte identical.
+  version 1.0.1: the SVG of every chart in `app/demo.html` is byte for byte identical. Only the
+  description of VT11 was corrected, since its first value is 0 and gives no visible bar.
 - Checkstyle and PMD: 0 errors. PMD gives mild warnings (priority 4–5) that fields lack comments.
   I have not added them, since the field names already say what the fields are.
 
@@ -97,6 +98,6 @@ Each row refers to a chart in `app/demo.html`, created by `app/src/main/java/se/
 | VT8 – Small decimals | Values 0.12–0.61. Expected: y-axis 0.1, 0.2 … 0.7 with a decimal dot and no long decimals | ✅ Passed |
 | VT9 – Special characters | Title `Åäö & <tecken> "citat"` and labels Göteborg, Malmö, Örebro. Expected: all characters shown exactly as written | ✅ Passed |
 | VT10 – Minimum size 100 × 100 | Smallest allowed size. Expected: chart fits inside its frame and nothing crashes | ⚠️ Partly passed: no crash and the chart fits, but the numbers on the y-axis overlap because the plot area is only 20 pixels high |
-| VT11 – Many values without labels | 40 values in a wave shape, no labels. Expected: 40 narrow bars above and below zero | ✅ Passed |
+| VT11 – Many values without labels | 40 values in a wave shape, no labels. The first value is 0. Expected: 39 visible narrow bars above and below zero, since a bar for 0 has no height | ✅ Passed |
 | VT12 – Large numbers | Values 1 200 000–2 380 000. Expected: numbers written in full, not as `1E+6` | ⚠️ Partly passed: numbers are written in full and not as `1E+6`. Numbers with 6 digits, such as `200000`, are shown in full, but every number with 7 digits, such as `1200000`, has its first digit cut off at the left edge, because the fixed left margin (50 pixels) is too narrow |
 | VT13 – Long labels | Five labels of up to 24 characters. Expected: shows the known limitation | ⚠️ Known limitation: labels are not shortened and run into each other |
