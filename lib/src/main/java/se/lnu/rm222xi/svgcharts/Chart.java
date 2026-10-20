@@ -13,15 +13,19 @@ public abstract class Chart {
   static final String FONT_FAMILY = "sans-serif";
 
   private static final int TARGET_TICK_COUNT = 5;
+
   private static final int MARGIN_TOP = 40;
   private static final int MARGIN_RIGHT = 20;
   private static final int MARGIN_BOTTOM = 40;
   private static final int MARGIN_LEFT = 50;
+
   private static final int TITLE_BASELINE = 24;
   private static final int TITLE_FONT_SIZE = 16;
+
   private static final int LABEL_FONT_SIZE = 12;
   private static final int TICK_LABEL_GAP = 8;
   private static final int CATEGORY_LABEL_OFFSET = 20;
+
   private static final String GRID_COLOR = "#e0e0e0";
 
   private final ChartOptions options;
@@ -39,6 +43,7 @@ public abstract class Chart {
     if (options == null) {
       throw new ChartDataException("Options must not be null");
     }
+
     this.options = options;
   }
 
@@ -53,6 +58,7 @@ public abstract class Chart {
     if (title == null) {
       throw new ChartDataException("Title must not be null");
     }
+
     this.title = title;
   }
 
@@ -172,11 +178,13 @@ public abstract class Chart {
     if (items == null) {
       throw new ChartDataException(itemName + "s must not be null");
     }
+
     for (int i = 0; i < items.size(); i++) {
       if (items.get(i) == null) {
         throw new ChartDataException(itemName + " at index " + i + " is null");
       }
     }
+
     return List.copyOf(items);
   }
 
@@ -214,12 +222,14 @@ public abstract class Chart {
   private LinearScale createVerticalScale(List<Double> ticks) {
     Interval tickInterval = new Interval(ticks.getFirst(), ticks.getLast());
     Interval pixelInterval = new Interval(plotBottom(), plotTop());
+
     return new LinearScale(tickInterval, pixelInterval);
   }
 
   private SvgElement createRoot() {
     int width = options.getWidth();
     int height = options.getHeight();
+
     return new SvgElement("svg")
         .setAttribute("xmlns", "http://www.w3.org/2000/svg")
         .setAttribute("width", width)
@@ -252,6 +262,7 @@ public abstract class Chart {
       axis.addChild(createGridLine(y));
       axis.addChild(createTickLabel(tick, y));
     }
+
     return axis;
   }
 
@@ -277,6 +288,7 @@ public abstract class Chart {
     for (int i = 0; i < labels.size(); i++) {
       labelGroup.addChild(createCategoryLabel(i));
     }
+
     return labelGroup;
   }
 

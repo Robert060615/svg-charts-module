@@ -28,6 +28,7 @@ class NumberFormatter {
     if (trimmed.endsWith(".")) {
       trimmed = trimmed.substring(0, trimmed.length() - 1);
     }
+
     return trimmed;
   }
 

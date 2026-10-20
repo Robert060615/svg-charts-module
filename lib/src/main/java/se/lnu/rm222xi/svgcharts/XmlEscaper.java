@@ -17,6 +17,7 @@ class XmlEscaper {
     for (char character : text.toCharArray()) {
       escaped.append(toEntity(character));
     }
+
     return escaped.toString();
   }
 

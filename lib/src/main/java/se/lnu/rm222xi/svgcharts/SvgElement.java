@@ -82,6 +82,7 @@ class SvgElement {
   private void appendTo(StringBuilder xml) {
     xml.append('<').append(tagName);
     appendAttributes(xml);
+
     if (hasNoContent()) {
       xml.append("/>");
     } else {
@@ -111,5 +112,4 @@ class SvgElement {
       child.appendTo(xml);
     }
   }
-
 }

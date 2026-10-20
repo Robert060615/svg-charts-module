@@ -53,6 +53,7 @@ public class ChartOptions {
       throw new ChartDataException(
           "Color must be a hex color like \"#f00\" or \"#1f77b4\", got \"" + color + "\"");
     }
+
     this.color = color;
   }
 
@@ -73,6 +74,7 @@ public class ChartOptions {
       throw new ChartDataException(
           dimension + " must be at least " + MINIMUM_SIZE + " pixels, got " + size);
     }
+
     return size;
   }
 

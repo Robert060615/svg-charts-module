@@ -22,6 +22,7 @@ class TickGenerator {
       throw new IllegalArgumentException(
           "An axis needs at least 2 ticks, got " + targetTickCount);
     }
+
     this.targetTickCount = targetTickCount;
   }
 
@@ -36,6 +37,7 @@ class TickGenerator {
    */
   List<Double> generateTicks(double min, double max) {
     requireMinNotGreaterThanMax(min, max);
+
     if (min == max) {
       return generateTicksForSingleValue(min);
     }
@@ -74,6 +76,7 @@ class TickGenerator {
     for (int i = 0; i <= intervalCount; i++) {
       ticks.add(roundToStepPrecision(axisStart + i * step, step));
     }
+
     return ticks;
   }
 

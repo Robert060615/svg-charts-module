@@ -54,6 +54,7 @@ public class LineChart extends Chart {
     if (pointCount == 1) {
       return (plotLeft() + plotRight()) / 2;
     }
+
     double distanceBetweenPoints = (plotRight() - plotLeft()) / (pointCount - 1);
     return plotLeft() + index * distanceBetweenPoints;
   }
@@ -64,6 +65,7 @@ public class LineChart extends Chart {
     for (int i = 0; i < getValues().size(); i++) {
       lineWithPoints.addChild(createPoint(i, verticalScale));
     }
+
     return lineWithPoints;
   }
 
@@ -78,12 +80,14 @@ public class LineChart extends Chart {
   private String createPathData(LinearScale verticalScale) {
     StringBuilder pathData = new StringBuilder();
     List<Double> values = getValues();
+
     for (int i = 0; i < values.size(); i++) {
       pathData.append(i == 0 ? "M " : " L ")
           .append(numberFormatter.format(horizontalPositionOf(i)))
           .append(' ')
           .append(numberFormatter.format(verticalScale.toPixel(values.get(i))));
     }
+
     return pathData.toString();
   }
 

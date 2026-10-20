@@ -33,6 +33,7 @@ class LinearScale {
     if (domain.length() == 0) {
       return pixels.middle();
     }
+
     return pixels.valueAt(domain.fractionOf(value));
   }
 }

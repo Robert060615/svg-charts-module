@@ -54,6 +54,7 @@ public class BarChart extends Chart {
     for (int i = 0; i < getValues().size(); i++) {
       bars.addChild(createBar(i, verticalScale));
     }
+
     return bars;
   }
 
@@ -62,6 +63,7 @@ public class BarChart extends Chart {
     double valueY = verticalScale.toPixel(getValues().get(index));
     double zeroLineY = verticalScale.toPixel(0);
     double barWidth = categoryWidth() * BAR_WIDTH_RATIO;
+
     return new SvgElement("rect")
         .setAttribute("x", centerX - barWidth / 2)
         .setAttribute("y", Math.min(valueY, zeroLineY))
