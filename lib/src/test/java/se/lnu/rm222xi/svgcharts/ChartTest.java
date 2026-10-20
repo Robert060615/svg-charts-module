@@ -36,7 +36,7 @@ class ChartTest {
 
     @Override
     double horizontalPositionOf(int index) {
-      return plotLeft() + index * 10;
+      return getPlotArea().left() + index * 10;
     }
 
     @Override

@@ -45,7 +45,7 @@ public class BarChart extends Chart {
 
   @Override
   double horizontalPositionOf(int index) {
-    return plotLeft() + categoryWidth() * (index + 0.5);
+    return getPlotArea().left() + categoryWidth() * (index + 0.5);
   }
 
   @Override
@@ -72,6 +72,6 @@ public class BarChart extends Chart {
   }
 
   private double categoryWidth() {
-    return (plotRight() - plotLeft()) / getValues().size();
+    return getPlotArea().width() / getValues().size();
   }
 }

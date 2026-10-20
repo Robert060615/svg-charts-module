@@ -15,11 +15,6 @@ public abstract class Chart {
 
   private static final int TARGET_TICK_COUNT = 5;
 
-  private static final int MARGIN_TOP = 40;
-  private static final int MARGIN_RIGHT = 20;
-  private static final int MARGIN_BOTTOM = 40;
-  private static final int MARGIN_LEFT = 50;
-
   private static final int TITLE_BASELINE = 24;
   private static final int TITLE_FONT_SIZE = 16;
 
@@ -30,6 +25,7 @@ public abstract class Chart {
   private static final String GRID_COLOR = "#e0e0e0";
 
   private final ChartOptions options;
+  private final PlotArea plotArea;
   private String title = "";
   private List<String> labels = List.of();
   private List<Double> values = List.of();
@@ -46,6 +42,7 @@ public abstract class Chart {
     }
 
     this.options = options;
+    this.plotArea = new PlotArea(options);
   }
 
   /**
@@ -159,48 +156,21 @@ public abstract class Chart {
   }
 
   /**
-   * Returns the x-coordinate of the left edge of the plot area, where the y-axis is drawn.
-   *
-   * @return the left edge in pixels
-   */
-  double plotLeft() {
-    return MARGIN_LEFT;
-  }
-
-  /**
-   * Returns the x-coordinate of the right edge of the plot area.
-   *
-   * @return the right edge in pixels
-   */
-  double plotRight() {
-    return options.getWidth() - MARGIN_RIGHT;
-  }
-
-  /**
-   * Returns the y-coordinate of the top edge of the plot area, just below the title.
-   *
-   * @return the top edge in pixels
-   */
-  double plotTop() {
-    return MARGIN_TOP;
-  }
-
-  /**
-   * Returns the y-coordinate of the bottom edge of the plot area, just above the labels.
-   *
-   * @return the bottom edge in pixels
-   */
-  double plotBottom() {
-    return options.getHeight() - MARGIN_BOTTOM;
-  }
-
-  /**
    * Returns the size and color settings the chart was created with.
    *
    * @return the options
    */
   ChartOptions getOptions() {
     return options;
+  }
+
+  /**
+   * Returns the part of the chart inside the margins, where the data is drawn.
+   *
+   * @return the plot area
+   */
+  PlotArea getPlotArea() {
+    return plotArea;
   }
 
   /**
@@ -285,7 +255,7 @@ public abstract class Chart {
 
   private LinearScale createVerticalScale(List<Double> ticks) {
     Interval tickInterval = new Interval(ticks.getFirst(), ticks.getLast());
-    Interval pixelInterval = new Interval(plotBottom(), plotTop());
+    Interval pixelInterval = new Interval(plotArea.bottom(), plotArea.top());
 
     return new LinearScale(tickInterval, pixelInterval);
   }
@@ -332,16 +302,16 @@ public abstract class Chart {
 
   private SvgElement createGridLine(double y) {
     return new SvgElement("line")
-        .setAttribute("x1", plotLeft())
+        .setAttribute("x1", plotArea.left())
         .setAttribute("y1", y)
-        .setAttribute("x2", plotRight())
+        .setAttribute("x2", plotArea.right())
         .setAttribute("y2", y)
         .setAttribute("stroke", GRID_COLOR);
   }
 
   private SvgElement createTickLabel(double tick, double y) {
     return new SvgElement("text")
-        .setAttribute("x", plotLeft() - TICK_LABEL_GAP)
+        .setAttribute("x", plotArea.left() - TICK_LABEL_GAP)
         .setAttribute("y", y)
         .setAttribute("dominant-baseline", "middle")
         .setText(formatTick(tick));
@@ -359,7 +329,7 @@ public abstract class Chart {
   private SvgElement createCategoryLabel(int index) {
     return new SvgElement("text")
         .setAttribute("x", horizontalPositionOf(index))
-        .setAttribute("y", plotBottom() + CATEGORY_LABEL_OFFSET)
+        .setAttribute("y", plotArea.bottom() + CATEGORY_LABEL_OFFSET)
         .setText(labels.get(index));
   }
 

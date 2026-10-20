@@ -50,13 +50,14 @@ public class LineChart extends Chart {
 
   @Override
   double horizontalPositionOf(int index) {
+    PlotArea plotArea = getPlotArea();
     int pointCount = getValues().size();
     if (pointCount == 1) {
-      return (plotLeft() + plotRight()) / 2;
+      return (plotArea.left() + plotArea.right()) / 2;
     }
 
-    double distanceBetweenPoints = (plotRight() - plotLeft()) / (pointCount - 1);
-    return plotLeft() + index * distanceBetweenPoints;
+    double distanceBetweenPoints = plotArea.width() / (pointCount - 1);
+    return plotArea.left() + index * distanceBetweenPoints;
   }
 
   @Override
