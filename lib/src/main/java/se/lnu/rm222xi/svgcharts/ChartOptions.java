@@ -77,12 +77,17 @@ public class ChartOptions {
   }
 
   private boolean isHexColor(String color) {
-    if (color == null || !color.startsWith("#")) {
-      return false;
-    }
-    if (color.length() != 4 && color.length() != 7) {
-      return false;
-    }
+    return color != null
+        && color.startsWith("#")
+        && hasHexColorLength(color)
+        && hasOnlyHexDigitsAfterHash(color);
+  }
+
+  private boolean hasHexColorLength(String color) {
+    return color.length() == 4 || color.length() == 7;
+  }
+
+  private boolean hasOnlyHexDigitsAfterHash(String color) {
     for (int i = 1; i < color.length(); i++) {
       if (Character.digit(color.charAt(i), 16) == -1) {
         return false;

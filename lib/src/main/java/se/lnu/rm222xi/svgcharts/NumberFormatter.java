@@ -15,13 +15,23 @@ class NumberFormatter {
    * @return the number as text
    */
   String format(double value) {
-    String formatted = String.format(Locale.ROOT, "%.2f", value);
-    while (formatted.endsWith("0")) {
-      formatted = formatted.substring(0, formatted.length() - 1);
+    String rounded = String.format(Locale.ROOT, "%.2f", value);
+    String withoutTrailingZeros = removeTrailingZeros(rounded);
+    return removeSignFromNegativeZero(withoutTrailingZeros);
+  }
+
+  private String removeTrailingZeros(String decimalNumber) {
+    String trimmed = decimalNumber;
+    while (trimmed.endsWith("0")) {
+      trimmed = trimmed.substring(0, trimmed.length() - 1);
     }
-    if (formatted.endsWith(".")) {
-      formatted = formatted.substring(0, formatted.length() - 1);
+    if (trimmed.endsWith(".")) {
+      trimmed = trimmed.substring(0, trimmed.length() - 1);
     }
-    return "-0".equals(formatted) ? "0" : formatted;
+    return trimmed;
+  }
+
+  private String removeSignFromNegativeZero(String number) {
+    return "-0".equals(number) ? "0" : number;
   }
 }

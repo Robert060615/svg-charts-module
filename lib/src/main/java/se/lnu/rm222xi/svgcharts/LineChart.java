@@ -68,6 +68,14 @@ public class LineChart extends Chart {
   }
 
   private SvgElement createLine(LinearScale verticalScale) {
+    return new SvgElement("path")
+        .setAttribute("d", createPathData(verticalScale))
+        .setAttribute("fill", "none")
+        .setAttribute("stroke", getOptions().getColor())
+        .setAttribute("stroke-width", LINE_WIDTH);
+  }
+
+  private String createPathData(LinearScale verticalScale) {
     StringBuilder pathData = new StringBuilder();
     List<Double> values = getValues();
     for (int i = 0; i < values.size(); i++) {
@@ -76,11 +84,7 @@ public class LineChart extends Chart {
           .append(' ')
           .append(numberFormatter.format(verticalScale.toPixel(values.get(i))));
     }
-    return new SvgElement("path")
-        .setAttribute("d", pathData.toString())
-        .setAttribute("fill", "none")
-        .setAttribute("stroke", getOptions().getColor())
-        .setAttribute("stroke-width", LINE_WIDTH);
+    return pathData.toString();
   }
 
   private SvgElement createPoint(int index, LinearScale verticalScale) {

@@ -35,24 +35,11 @@ class TickGenerator {
    * @return the tick values in increasing order
    */
   List<Double> generateTicks(double min, double max) {
-    if (min > max) {
-      throw new IllegalArgumentException(
-          "min (" + min + ") must not be greater than max (" + max + ")");
-    }
+    requireMinNotGreaterThanMax(min, max);
     if (min == max) {
       return generateTicksForSingleValue(min);
     }
-
-    double step = calculateStep(min, max);
-    double axisStart = Math.floor(min / step + TOLERANCE) * step;
-    double axisEnd = Math.ceil(max / step - TOLERANCE) * step;
-    long intervalCount = Math.round((axisEnd - axisStart) / step);
-
-    List<Double> ticks = new ArrayList<>();
-    for (int i = 0; i <= intervalCount; i++) {
-      ticks.add(roundToStepPrecision(axisStart + i * step, step));
-    }
-    return ticks;
+    return generateTicksForRange(min, max);
   }
 
   /**
@@ -68,6 +55,34 @@ class TickGenerator {
     double magnitude = Math.pow(10, Math.floor(Math.log10(roughStep)));
     double normalizedStep = roughStep / magnitude;
     return roundToNiceNumber(normalizedStep) * magnitude;
+  }
+
+  private void requireMinNotGreaterThanMax(double min, double max) {
+    if (min > max) {
+      throw new IllegalArgumentException(
+          "min (" + min + ") must not be greater than max (" + max + ")");
+    }
+  }
+
+  private List<Double> generateTicksForRange(double min, double max) {
+    double step = calculateStep(min, max);
+    double axisStart = roundDownToStep(min, step);
+    double axisEnd = roundUpToStep(max, step);
+    long intervalCount = Math.round((axisEnd - axisStart) / step);
+
+    List<Double> ticks = new ArrayList<>();
+    for (int i = 0; i <= intervalCount; i++) {
+      ticks.add(roundToStepPrecision(axisStart + i * step, step));
+    }
+    return ticks;
+  }
+
+  private double roundDownToStep(double value, double step) {
+    return Math.floor(value / step + TOLERANCE) * step;
+  }
+
+  private double roundUpToStep(double value, double step) {
+    return Math.ceil(value / step - TOLERANCE) * step;
   }
 
   private List<Double> generateTicksForSingleValue(double value) {

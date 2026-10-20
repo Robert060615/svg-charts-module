@@ -81,6 +81,17 @@ class SvgElement {
 
   private void appendTo(StringBuilder xml) {
     xml.append('<').append(tagName);
+    appendAttributes(xml);
+    if (hasNoContent()) {
+      xml.append("/>");
+    } else {
+      xml.append('>');
+      appendContent(xml);
+      xml.append("</").append(tagName).append('>');
+    }
+  }
+
+  private void appendAttributes(StringBuilder xml) {
     for (Map.Entry<String, String> attribute : attributes.entrySet()) {
       xml.append(' ')
           .append(attribute.getKey())
@@ -88,17 +99,17 @@ class SvgElement {
           .append(escaper.escape(attribute.getValue()))
           .append('"');
     }
+  }
 
-    if (text.isEmpty() && children.isEmpty()) {
-      xml.append("/>");
-      return;
-    }
+  private boolean hasNoContent() {
+    return text.isEmpty() && children.isEmpty();
+  }
 
-    xml.append('>').append(escaper.escape(text));
+  private void appendContent(StringBuilder xml) {
+    xml.append(escaper.escape(text));
     for (SvgElement child : children) {
       child.appendTo(xml);
     }
-    xml.append("</").append(tagName).append('>');
   }
 
 }
