@@ -75,12 +75,7 @@ public abstract class Chart {
    */
   public void setValues(List<Double> values) {
     List<Double> checkedValues = copyWithoutNulls(values, "Value");
-    for (int i = 0; i < checkedValues.size(); i++) {
-      if (!Double.isFinite(checkedValues.get(i))) {
-        throw new ChartDataException(
-            "Value at index " + i + " must be a finite number, got " + checkedValues.get(i));
-      }
-    }
+    requireFiniteValues(checkedValues);
     this.values = checkedValues;
   }
 
@@ -94,9 +89,8 @@ public abstract class Chart {
    */
   public String toSvg() {
     requireRenderableData();
-    List<Double> ticks = new TickGenerator(TARGET_TICK_COUNT).generateTicks(axisMin(), axisMax());
-    LinearScale verticalScale =
-        new LinearScale(ticks.getFirst(), ticks.getLast(), plotBottom(), plotTop());
+    List<Double> ticks = generateTicks();
+    LinearScale verticalScale = createVerticalScale(ticks);
 
     return createRoot()
         .addChild(new SvgElement("title").setText(title))
@@ -186,14 +180,39 @@ public abstract class Chart {
     return List.copyOf(items);
   }
 
+  private void requireFiniteValues(List<Double> values) {
+    for (int i = 0; i < values.size(); i++) {
+      if (!Double.isFinite(values.get(i))) {
+        throw new ChartDataException(
+            "Value at index " + i + " must be a finite number, got " + values.get(i));
+      }
+    }
+  }
+
   private void requireRenderableData() {
+    requireValues();
+    requireOneLabelPerValue();
+  }
+
+  private void requireValues() {
     if (values.isEmpty()) {
       throw new ChartDataException("Cannot render chart without values. Call setValues() first.");
     }
+  }
+
+  private void requireOneLabelPerValue() {
     if (!labels.isEmpty() && labels.size() != values.size()) {
       throw new ChartDataException(
           "Expected " + labels.size() + " values to match labels, got " + values.size());
     }
+  }
+
+  private List<Double> generateTicks() {
+    return new TickGenerator(TARGET_TICK_COUNT).generateTicks(axisMin(), axisMax());
+  }
+
+  private LinearScale createVerticalScale(List<Double> ticks) {
+    return new LinearScale(ticks.getFirst(), ticks.getLast(), plotBottom(), plotTop());
   }
 
   private SvgElement createRoot() {
@@ -254,12 +273,16 @@ public abstract class Chart {
   private SvgElement createCategoryLabels() {
     SvgElement labelGroup = createLabelGroup("middle");
     for (int i = 0; i < labels.size(); i++) {
-      labelGroup.addChild(new SvgElement("text")
-          .setAttribute("x", horizontalPositionOf(i))
-          .setAttribute("y", plotBottom() + CATEGORY_LABEL_OFFSET)
-          .setText(labels.get(i)));
+      labelGroup.addChild(createCategoryLabel(i));
     }
     return labelGroup;
+  }
+
+  private SvgElement createCategoryLabel(int index) {
+    return new SvgElement("text")
+        .setAttribute("x", horizontalPositionOf(index))
+        .setAttribute("y", plotBottom() + CATEGORY_LABEL_OFFSET)
+        .setText(labels.get(index));
   }
 
   private SvgElement createLabelGroup(String textAnchor) {
