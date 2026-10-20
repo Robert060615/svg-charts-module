@@ -8,6 +8,10 @@ import java.util.List;
  */
 class TickGenerator {
 
+  /**
+   * Allowed rounding error when deciding whether a value already lies on a tick, so that for
+   * example 0.30000000000000004 counts as 0.3.
+   */
   private static final double TOLERANCE = 1e-9;
 
   private final int targetTickCount;
@@ -16,6 +20,7 @@ class TickGenerator {
    * Creates a generator that aims for roughly the given number of ticks on an axis.
    *
    * @param targetTickCount the preferred number of ticks, at least 2
+   * @throws IllegalArgumentException if targetTickCount is less than 2
    */
   TickGenerator(int targetTickCount) {
     if (targetTickCount < 2) {
@@ -34,6 +39,7 @@ class TickGenerator {
    * @param min the smallest value on the axis
    * @param max the largest value on the axis, not less than min
    * @return the tick values in increasing order
+   * @throws IllegalArgumentException if min is greater than max
    */
   List<Double> generateTicks(double min, double max) {
     requireMinNotGreaterThanMax(min, max);
@@ -88,6 +94,10 @@ class TickGenerator {
     return Math.ceil(value / step - TOLERANCE) * step;
   }
 
+  /**
+   * Returns ticks from zero to the value, since a single value gives no range to divide. If the
+   * value is zero, the axis goes from 0 to 1.
+   */
   private List<Double> generateTicksForSingleValue(double value) {
     if (value > 0) {
       return generateTicks(0, value);
@@ -98,6 +108,10 @@ class TickGenerator {
     return generateTicks(0, 1);
   }
 
+  /**
+   * Rounds a step between 1 and 10 to the closest of 1, 2, 5 or 10, the numbers people find easy
+   * to count in.
+   */
   private double roundToNiceNumber(double normalizedStep) {
     if (normalizedStep < 1.5) {
       return 1;
@@ -111,6 +125,10 @@ class TickGenerator {
     return 10;
   }
 
+  /**
+   * Rounds a value to as many decimals as the step has, which removes floating point errors such
+   * as 0.30000000000000004 when the step is 0.1.
+   */
   private double roundToStepPrecision(double value, double step) {
     double decimalCount = Math.max(0, -Math.floor(Math.log10(step)));
     double scale = Math.pow(10, decimalCount);

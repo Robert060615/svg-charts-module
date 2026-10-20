@@ -32,6 +32,10 @@ class NumberFormatter {
     return trimmed;
   }
 
+  /**
+   * Turns "-0" into "0". It happens when a small negative number, such as -0.001, is rounded to
+   * two decimals.
+   */
   private String removeSignFromNegativeZero(String number) {
     return "-0".equals(number) ? "0" : number;
   }

@@ -57,14 +57,29 @@ public class ChartOptions {
     this.color = color;
   }
 
+  /**
+   * Returns the width of the whole chart.
+   *
+   * @return the width in pixels
+   */
   int getWidth() {
     return width;
   }
 
+  /**
+   * Returns the height of the whole chart.
+   *
+   * @return the height in pixels
+   */
   int getHeight() {
     return height;
   }
 
+  /**
+   * Returns the color of the bars or the line.
+   *
+   * @return a hex color, for example {@code "#1f77b4"}
+   */
   String getColor() {
     return color;
   }

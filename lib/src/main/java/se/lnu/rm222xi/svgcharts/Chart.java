@@ -10,6 +10,7 @@ import java.util.List;
  */
 public abstract class Chart {
 
+  /** The font used for all text in the chart. */
   static final String FONT_FAMILY = "sans-serif";
 
   private static final int TARGET_TICK_COUNT = 5;
@@ -111,11 +112,15 @@ public abstract class Chart {
   /**
    * Returns the lowest value the y-axis must show. Each chart type decides, for example whether
    * zero must be included.
+   *
+   * @return the lowest value on the y-axis
    */
   abstract double axisMin();
 
   /**
    * Returns the highest value the y-axis must show.
+   *
+   * @return the highest value on the y-axis
    */
   abstract double axisMax();
 
@@ -123,6 +128,7 @@ public abstract class Chart {
    * Returns the x-coordinate where the value and label at the given index are placed.
    *
    * @param index the position in the list of values, starting at 0
+   * @return the x-coordinate in pixels
    */
   abstract double horizontalPositionOf(int index);
 
@@ -134,46 +140,104 @@ public abstract class Chart {
    */
   abstract SvgElement drawData(LinearScale verticalScale);
 
+  /**
+   * Returns the smallest of the values. Only call it when there is at least one value.
+   *
+   * @return the smallest value
+   */
   double minValue() {
     return Collections.min(values);
   }
 
+  /**
+   * Returns the largest of the values. Only call it when there is at least one value.
+   *
+   * @return the largest value
+   */
   double maxValue() {
     return Collections.max(values);
   }
 
+  /**
+   * Returns the x-coordinate of the left edge of the plot area, where the y-axis is drawn.
+   *
+   * @return the left edge in pixels
+   */
   double plotLeft() {
     return MARGIN_LEFT;
   }
 
+  /**
+   * Returns the x-coordinate of the right edge of the plot area.
+   *
+   * @return the right edge in pixels
+   */
   double plotRight() {
     return options.getWidth() - MARGIN_RIGHT;
   }
 
+  /**
+   * Returns the y-coordinate of the top edge of the plot area, just below the title.
+   *
+   * @return the top edge in pixels
+   */
   double plotTop() {
     return MARGIN_TOP;
   }
 
+  /**
+   * Returns the y-coordinate of the bottom edge of the plot area, just above the labels.
+   *
+   * @return the bottom edge in pixels
+   */
   double plotBottom() {
     return options.getHeight() - MARGIN_BOTTOM;
   }
 
+  /**
+   * Returns the size and color settings the chart was created with.
+   *
+   * @return the options
+   */
   ChartOptions getOptions() {
     return options;
   }
 
+  /**
+   * Returns the heading.
+   *
+   * @return the heading, empty if none is set
+   */
   String getTitle() {
     return title;
   }
 
+  /**
+   * Returns the labels under the x-axis.
+   *
+   * @return an unmodifiable list, empty if no labels are set
+   */
   List<String> getLabels() {
     return labels;
   }
 
+  /**
+   * Returns the values to draw.
+   *
+   * @return an unmodifiable list, empty if no values are set
+   */
   List<Double> getValues() {
     return values;
   }
 
+  /**
+   * Checks that neither the list nor anything in it is null, and returns an unmodifiable copy so
+   * that later changes to the caller's list do not affect the chart.
+   *
+   * @param items the list to check
+   * @param itemName what one item is called in the error message, for example "Label"
+   * @return an unmodifiable copy of the list
+   */
   private <T> List<T> copyWithoutNulls(List<T> items, String itemName) {
     if (items == null) {
       throw new ChartDataException(itemName + "s must not be null");

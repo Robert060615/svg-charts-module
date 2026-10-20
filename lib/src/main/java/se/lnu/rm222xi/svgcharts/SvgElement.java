@@ -30,6 +30,8 @@ class SvgElement {
   /**
    * Sets an attribute, replacing any earlier value with the same name.
    *
+   * @param name the attribute name, for example {@code "fill"}
+   * @param value the attribute value, escaped when the element is written
    * @return this element, so calls can be chained
    */
   SvgElement setAttribute(String name, String value) {
@@ -41,6 +43,8 @@ class SvgElement {
    * Sets a numeric attribute, rounded to at most two decimals and always written with a dot as the
    * decimal separator, whatever the computer's language settings are.
    *
+   * @param name the attribute name, for example {@code "x"}
+   * @param value the number to write
    * @return this element, so calls can be chained
    */
   SvgElement setAttribute(String name, double value) {
@@ -50,6 +54,7 @@ class SvgElement {
   /**
    * Sets the text between the start and end tag.
    *
+   * @param text the text, escaped when the element is written
    * @return this element, so calls can be chained
    */
   SvgElement setText(String text) {
@@ -60,6 +65,7 @@ class SvgElement {
   /**
    * Places another element inside this one, after any children added earlier.
    *
+   * @param child the element to place inside
    * @return this element, so calls can be chained
    */
   SvgElement addChild(SvgElement child) {
