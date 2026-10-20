@@ -22,6 +22,24 @@ class Interval {
   }
 
   /**
+   * Returns where the interval begins.
+   *
+   * @return the start
+   */
+  double start() {
+    return start;
+  }
+
+  /**
+   * Returns where the interval ends.
+   *
+   * @return the end
+   */
+  double end() {
+    return end;
+  }
+
+  /**
    * Returns the distance from start to end. It is negative if end is smaller than start.
    *
    * @return end minus start

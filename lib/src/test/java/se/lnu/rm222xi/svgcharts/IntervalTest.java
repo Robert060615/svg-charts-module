@@ -13,6 +13,13 @@ class IntervalTest {
   private final Interval interval = new Interval(10, 50);
 
   @Test
+  @DisplayName("should give back its start and end")
+  void givesStartAndEnd() {
+    assertEquals(10, interval.start(), PRECISION);
+    assertEquals(50, interval.end(), PRECISION);
+  }
+
+  @Test
   @DisplayName("should give end minus start as length")
   void givesLength() {
     assertEquals(40, interval.length(), PRECISION);

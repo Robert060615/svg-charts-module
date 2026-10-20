@@ -1,6 +1,5 @@
 package se.lnu.rm222xi.svgcharts;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,19 +12,13 @@ public abstract class Chart {
   /** The font used for all text in the chart. */
   static final String FONT_FAMILY = "sans-serif";
 
-  private static final int TARGET_TICK_COUNT = 5;
-
   private static final int TITLE_BASELINE = 24;
   private static final int TITLE_FONT_SIZE = 16;
-
-  private static final int LABEL_FONT_SIZE = 12;
-  private static final int TICK_LABEL_GAP = 8;
   private static final int CATEGORY_LABEL_OFFSET = 20;
-
-  private static final String GRID_COLOR = "#e0e0e0";
 
   private final ChartOptions options;
   private final PlotArea plotArea;
+  private final LabelStyle labelStyle = new LabelStyle();
   private String title = "";
   private List<String> labels = List.of();
   private List<Double> values = List.of();
@@ -93,16 +86,15 @@ public abstract class Chart {
    */
   public String toSvg() {
     requireRenderableData();
-    List<Double> ticks = generateTicks();
-    LinearScale verticalScale = createVerticalScale(ticks);
+    ValueAxis valueAxis = createValueAxis();
 
     return createRoot()
         .addChild(new SvgElement("title").setText(title))
         .addChild(createBackground())
         .addChild(createHeading())
-        .addChild(createValueAxis(ticks, verticalScale))
+        .addChild(valueAxis.toSvgElement())
         .addChild(createCategoryLabels())
-        .addChild(drawData(verticalScale))
+        .addChild(drawData(valueAxis.scale()))
         .toString();
   }
 
@@ -249,15 +241,8 @@ public abstract class Chart {
     }
   }
 
-  private List<Double> generateTicks() {
-    return new TickGenerator(TARGET_TICK_COUNT).generateTicks(axisMin(), axisMax());
-  }
-
-  private LinearScale createVerticalScale(List<Double> ticks) {
-    Interval tickInterval = new Interval(ticks.getFirst(), ticks.getLast());
-    Interval pixelInterval = new Interval(plotArea.bottom(), plotArea.top());
-
-    return new LinearScale(tickInterval, pixelInterval);
+  private ValueAxis createValueAxis() {
+    return new ValueAxis(new Interval(axisMin(), axisMax()), plotArea);
   }
 
   private SvgElement createRoot() {
@@ -289,36 +274,8 @@ public abstract class Chart {
         .setText(title);
   }
 
-  private SvgElement createValueAxis(List<Double> ticks, LinearScale verticalScale) {
-    SvgElement axis = createLabelGroup("end");
-    for (double tick : ticks) {
-      double y = verticalScale.toPixel(tick);
-      axis.addChild(createGridLine(y));
-      axis.addChild(createTickLabel(tick, y));
-    }
-
-    return axis;
-  }
-
-  private SvgElement createGridLine(double y) {
-    return new SvgElement("line")
-        .setAttribute("x1", plotArea.left())
-        .setAttribute("y1", y)
-        .setAttribute("x2", plotArea.right())
-        .setAttribute("y2", y)
-        .setAttribute("stroke", GRID_COLOR);
-  }
-
-  private SvgElement createTickLabel(double tick, double y) {
-    return new SvgElement("text")
-        .setAttribute("x", plotArea.left() - TICK_LABEL_GAP)
-        .setAttribute("y", y)
-        .setAttribute("dominant-baseline", "middle")
-        .setText(formatTick(tick));
-  }
-
   private SvgElement createCategoryLabels() {
-    SvgElement labelGroup = createLabelGroup("middle");
+    SvgElement labelGroup = labelStyle.createGroup("middle");
     for (int i = 0; i < labels.size(); i++) {
       labelGroup.addChild(createCategoryLabel(i));
     }
@@ -331,16 +288,5 @@ public abstract class Chart {
         .setAttribute("x", horizontalPositionOf(index))
         .setAttribute("y", plotArea.bottom() + CATEGORY_LABEL_OFFSET)
         .setText(labels.get(index));
-  }
-
-  private SvgElement createLabelGroup(String textAnchor) {
-    return new SvgElement("g")
-        .setAttribute("font-family", FONT_FAMILY)
-        .setAttribute("font-size", LABEL_FONT_SIZE)
-        .setAttribute("text-anchor", textAnchor);
-  }
-
-  private String formatTick(double tick) {
-    return BigDecimal.valueOf(tick).stripTrailingZeros().toPlainString();
   }
 }
