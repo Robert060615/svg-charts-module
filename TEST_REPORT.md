@@ -36,16 +36,18 @@ under its heading.
 
 | | |
 |---|---|
-| Date | 2026-09-30 |
+| Date | 2026-10-20 |
+| Version tested | 1.1.0 |
 | Operating system | macOS 14.4 |
 | JDK | Temurin 25 (through the Gradle toolchain) |
 | Browser for visual tests | Firefox |
 
 ### Result
 
-- **Unit tests: 105 of 105 passed.**
+- **Unit tests: 125 of 125 passed.**
 - **Visual tests: 10 of 13 passed.** VT10, VT12 and VT13 show known limitations that are
-  described in the [README](README.md#known-limitations).
+  described in the [README](README.md#known-limitations). The charts look exactly the same as in
+  version 1.0.1: the generated `app/demo.html` is byte for byte identical.
 - Checkstyle and PMD: 0 errors. PMD gives mild warnings (priority 4–5) that fields lack comments.
   I have not added them, since the field names already say what the fields are.
 
@@ -60,19 +62,24 @@ under its heading.
 | `TickGenerator` gives exact decimals, without floating point noise such as 0.6000000000000001 | `TickGeneratorTest`: 0–1 gives exactly 0.0, 0.2 … 1.0; 0.6–1.4 gets no extra tick at 0.4 | ✅ Passed |
 | `TickGenerator` edge cases | `TickGeneratorTest`: only negatives (−87 to −3 gives −100–0), min = max positive and negative, only zeros (0–1), min > max throws, fewer than 2 ticks throws | ✅ Passed |
 | `LinearScale.toPixel` converts values to pixels | `LinearScaleTest`, 9 tests: min, max and middle; inverted y-axis; negative domain; values outside the domain; min = max gives the middle without dividing by zero | ✅ Passed |
+| `Interval` describes a stretch of numbers | `IntervalTest`, 6 tests: start and end; length, also negative when reversed; middle; fraction of a value; value at a fraction | ✅ Passed |
+| `PlotArea` leaves room for title, axis numbers and labels | `PlotAreaTest`, 6 tests: left, right, top and bottom edge and width for 600 × 400; follows options that are changed after it was created | ✅ Passed |
+| `ValueAxis` draws the y-axis | `ValueAxisTest`, 5 tests: lowest tick at the bottom and highest at the top of the plot area; scale stretched to readable ticks around 3–97; one grid line and one number per tick; numbers without trailing zeros | ✅ Passed |
+| `LabelStyle` gives all small text the same font | `LabelStyleTest`: group with `sans-serif`, size 12 and the given alignment | ✅ Passed |
 | `XmlEscaper` makes text safe in SVG | `XmlEscaperTest`: all of `& < > " '` become entities; text with åäö is untouched; mixed text; empty string | ✅ Passed |
 | `SvgElement` writes correct XML | `SvgElementTest`, 8 tests: self-closing tag, attribute order, replacing an attribute, text, nested children, escaping | ✅ Passed |
 | `NumberFormatter` writes numbers the way SVG expects | `NumberFormatterTest`, 6 tests: 100.0 as `100`, 12.3456 as `12.35`, 0.5 as `0.5`, −0.001 as `0`, minus sign kept, decimal dot with Swedish locale | ✅ Passed |
 | `ChartOptions` defaults and validation | `ChartOptionsTest`, 12 tests: defaults 600 × 400 and `#1f77b4`; 100 accepted, 99 and −5 throw with exact message; old value kept after an error; `#f80` and `#ff8800` accepted; `ff8800`, `#ff88`, `#gg0000`, `red` and `null` throw | ✅ Passed |
 | `ChartDataException` | `ChartDataExceptionTest`: keeps its message and is an `IllegalArgumentException` | ✅ Passed |
-| `setTitle`, `setLabels`, `setValues` store and validate input | `ChartTest`: values are stored; `null` lists, `null` items (with index in the message), infinity and NaN throw; old values are kept after an error; changing the caller's list afterwards does not change the chart | ✅ Passed |
+| `setTitle`, `setLabels`, `setValues` store and validate input | `ChartTest`: values are stored; a new title replaces an earlier one; `null` lists, `null` items (with index in the message), infinity and NaN throw; old values are kept after an error; changing the caller's list of values or labels afterwards does not change the chart | ✅ Passed |
 | `toSvg()` builds a complete SVG document | `ChartTest`: `<svg>` with `xmlns`, size and `viewBox`; title both as `<title>` and visible text; escaped title; works without labels | ✅ Passed |
 | `toSvg()` validates before drawing | `ChartTest`: no values gives `Cannot render chart without values. Call setValues() first.`; 5 labels and 4 values gives `Expected 5 values to match labels, got 4` | ✅ Passed |
-| Axes: one grid line and one number per tick, labels under the plot area | `ChartTest`, 5 tests: 0–87 gives 6 lines and the numbers 0 and 100; 0.6 written without noise; 1 000 000 written as `1000000`, not `1E+6`; lowest tick at the bottom; labels escaped | ✅ Passed |
+| Axes: one grid line and one number per tick, labels under the plot area | `ChartTest`, 6 tests: 0–87 gives 6 lines and the numbers 0 and 100; 0.6 written without noise; 1 000 000 written as `1000000`, not `1E+6`; lowest tick at the bottom; labels escaped; y-coordinate of the value at an index | ✅ Passed |
 | `BarChart` draws one bar per value from the zero line | `BarChartTest`, 8 tests: 5 values give 5 bars; exact position and height of a positive and a negative bar; zero gives a bar without height; y-axis includes 0 for only positive and only negative values; label under the middle of its bar; color from options | ✅ Passed |
 | `LineChart` draws a line with a dot per value | `LineChartTest`, 7 tests: exact path `M 50 360 L 315 200 L 580 40`; one `<circle>` per value; a single value in the middle; y-axis does not have to start at 0; equal values give a straight line; labels under the points; color on line and dots | ✅ Passed |
-| Every chart type, through the public interface only | `PublicApiTest`, 6 tests on both `BarChart` and `LineChart`: starts with `<svg`; contains `<title>`; `toSvg()` twice gives the same result; no decimal commas with Swedish locale; invalid input can be caught as `ChartDataException` and as `IllegalArgumentException` | ✅ Passed |
-| The locale test really catches the error it is meant to catch | Manual check: temporarily removed `Locale.ROOT` from `NumberFormatter` and ran `PublicApiTest` | ✅ The test failed as it should, and passed again when the code was restored |
+| Every chart type, through the public interface only | `PublicApiTest`, 7 tests on both `BarChart` and `LineChart`: starts with `<svg`; contains `<title>`; `toSvg()` twice gives the same result; no decimal commas with Swedish locale; usable through the `SvgChart` interface; invalid input can be caught as `ChartDataException` and as `IllegalArgumentException` | ✅ Passed |
+| The locale test really catches the error it is meant to catch | Manual check, repeated for version 1.1.0: temporarily removed `Locale.ROOT` from `NumberFormatter` and ran `PublicApiTest` | ✅ The test failed as it should, and passed again when the code was restored |
+| Version 1.1.0 does not change the public interface of 1.0.1 | Manual check: compared the output of `javap` for the five public classes in tag `v1.0.1` and in version 1.1.0 | ✅ All public constructors and methods are unchanged. The only difference is that `Chart` now also implements `SvgChart` |
 
 ### Visual tests
 

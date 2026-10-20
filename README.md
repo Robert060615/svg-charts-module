@@ -64,7 +64,7 @@ Add the dependency to `build.gradle`:
 
 ```groovy
 dependencies {
-    implementation 'com.github.Robert060615:svg-charts-module:v1.0.1'
+    implementation 'com.github.Robert060615:svg-charts-module:v1.1.0'
 }
 ```
 
@@ -81,7 +81,7 @@ dependencies {
 <dependency>
   <groupId>com.github.Robert060615</groupId>
   <artifactId>svg-charts-module</artifactId>
-  <version>v1.0.1</version>
+  <version>v1.1.0</version>
 </dependency>
 ```
 
@@ -104,6 +104,7 @@ import java.util.List;
 import se.lnu.rm222xi.svgcharts.BarChart;
 import se.lnu.rm222xi.svgcharts.ChartOptions;
 import se.lnu.rm222xi.svgcharts.LineChart;
+import se.lnu.rm222xi.svgcharts.SvgChart;
 ```
 
 ### Bar chart
@@ -132,6 +133,19 @@ String svg = chart.toSvg();
 
 The y-axis of a line chart follows the smallest and largest value, so it does not have to start at
 zero.
+
+### Choosing the chart type while the program runs
+
+Both chart types implement the interface `SvgChart`, which lists everything you can do with a
+chart. Use it as the type of your variable when the rest of your code should not care which kind of
+chart it is:
+
+```java
+SvgChart chart = userWantsBars ? new BarChart() : new LineChart();
+chart.setValues(List.of(3.0, 1.5, 4.0));
+
+String svg = chart.toSvg();
+```
 
 ### Size and color
 
@@ -175,9 +189,11 @@ try {
 
 ## API reference
 
-### `BarChart` and `LineChart`
+### `SvgChart`, `BarChart` and `LineChart`
 
-Both extend the abstract class `Chart` and have the same methods.
+`BarChart` and `LineChart` both implement the interface `SvgChart` and have the same methods. You
+can use `SvgChart`, `BarChart` or `LineChart` as the type of your variable. Code written for
+version 1.0 that uses the abstract class `Chart` as its type still works.
 
 | Method | Description |
 |---|---|
@@ -248,7 +264,15 @@ it. The results are in [TEST_REPORT.md](TEST_REPORT.md).
 |---|---|
 | `lib/` | The library itself: the code you use. |
 | `app/` | A test app that draws all visual test cases. Not part of the library. |
-| `docs/` | Example images for this README. |
+| `docs/` | Example images for this README and a class diagram of the library (`lib_class_diagram.puml`, PlantUML). |
+
+## Versions
+
+| Version | Changes |
+|---|---|
+| `v1.1.0` | New interface `SvgChart` that lists every method of a chart. The inside of the library has been restructured for readability. Charts look exactly the same and code written for 1.0 works without changes. |
+| `v1.0.1` | Documentation for the `ChartOptions` constructor. |
+| `v1.0.0` | First release. |
 
 ## Contributing
 
