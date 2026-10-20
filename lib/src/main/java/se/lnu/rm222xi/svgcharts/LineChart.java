@@ -1,7 +1,5 @@
 package se.lnu.rm222xi.svgcharts;
 
-import java.util.List;
-
 /**
  * A chart with a line through all values and a dot on each value. The y-axis follows the smallest
  * and largest value, so it does not have to start at zero.
@@ -80,13 +78,11 @@ public class LineChart extends Chart {
 
   private String createPathData(LinearScale verticalScale) {
     StringBuilder pathData = new StringBuilder();
-    List<Double> values = getValues();
-
-    for (int i = 0; i < values.size(); i++) {
+    for (int i = 0; i < getValues().size(); i++) {
       pathData.append(i == 0 ? "M " : " L ")
           .append(numberFormatter.format(horizontalPositionOf(i)))
           .append(' ')
-          .append(numberFormatter.format(verticalScale.toPixel(values.get(i))));
+          .append(numberFormatter.format(verticalPositionOf(i, verticalScale)));
     }
 
     return pathData.toString();
@@ -95,7 +91,7 @@ public class LineChart extends Chart {
   private SvgElement createPoint(int index, LinearScale verticalScale) {
     return new SvgElement("circle")
         .setAttribute("cx", horizontalPositionOf(index))
-        .setAttribute("cy", verticalScale.toPixel(getValues().get(index)))
+        .setAttribute("cy", verticalPositionOf(index, verticalScale))
         .setAttribute("r", POINT_RADIUS)
         .setAttribute("fill", getOptions().getColor());
   }

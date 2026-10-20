@@ -9,6 +9,9 @@ package se.lnu.rm222xi.svgcharts;
 public class ChartOptions {
 
   private static final int MINIMUM_SIZE = 100;
+  private static final int SHORT_HEX_LENGTH = 4;
+  private static final int LONG_HEX_LENGTH = 7;
+  private static final int HEX_RADIX = 16;
 
   private int width = 600;
   private int height = 400;
@@ -101,12 +104,12 @@ public class ChartOptions {
   }
 
   private boolean hasHexColorLength(String color) {
-    return color.length() == 4 || color.length() == 7;
+    return color.length() == SHORT_HEX_LENGTH || color.length() == LONG_HEX_LENGTH;
   }
 
   private boolean hasOnlyHexDigitsAfterHash(String color) {
     for (int i = 1; i < color.length(); i++) {
-      if (Character.digit(color.charAt(i), 16) == -1) {
+      if (Character.digit(color.charAt(i), HEX_RADIX) == -1) {
         return false;
       }
     }

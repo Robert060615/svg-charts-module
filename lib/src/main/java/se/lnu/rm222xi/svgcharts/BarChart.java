@@ -60,7 +60,7 @@ public class BarChart extends Chart {
 
   private SvgElement createBar(int index, LinearScale verticalScale) {
     double centerX = horizontalPositionOf(index);
-    double valueY = verticalScale.toPixel(getValues().get(index));
+    double valueY = verticalPositionOf(index, verticalScale);
     double zeroLineY = verticalScale.toPixel(0);
     double barWidth = categoryWidth() * BAR_WIDTH_RATIO;
 

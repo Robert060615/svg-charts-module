@@ -89,12 +89,12 @@ class SvgElement {
     xml.append('<').append(tagName);
     appendAttributes(xml);
 
-    if (hasNoContent()) {
-      xml.append("/>");
-    } else {
+    if (hasContent()) {
       xml.append('>');
       appendContent(xml);
       xml.append("</").append(tagName).append('>');
+    } else {
+      xml.append("/>");
     }
   }
 
@@ -108,8 +108,8 @@ class SvgElement {
     }
   }
 
-  private boolean hasNoContent() {
-    return text.isEmpty() && children.isEmpty();
+  private boolean hasContent() {
+    return !text.isEmpty() || !children.isEmpty();
   }
 
   private void appendContent(StringBuilder xml) {

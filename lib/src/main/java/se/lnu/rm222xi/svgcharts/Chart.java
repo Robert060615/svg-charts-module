@@ -148,6 +148,17 @@ public abstract class Chart {
   }
 
   /**
+   * Returns the y-coordinate of the value at the given index.
+   *
+   * @param index the position in the list of values, starting at 0
+   * @param verticalScale converts a value to its y-coordinate
+   * @return the y-coordinate in pixels
+   */
+  double verticalPositionOf(int index, LinearScale verticalScale) {
+    return verticalScale.toPixel(values.get(index));
+  }
+
+  /**
    * Returns the size and color settings the chart was created with.
    *
    * @return the options
@@ -235,10 +246,18 @@ public abstract class Chart {
   }
 
   private void requireOneLabelPerValue() {
-    if (!labels.isEmpty() && labels.size() != values.size()) {
+    if (hasLabels() && !hasOneLabelPerValue()) {
       throw new ChartDataException(
           "Expected " + labels.size() + " values to match labels, got " + values.size());
     }
+  }
+
+  private boolean hasLabels() {
+    return !labels.isEmpty();
+  }
+
+  private boolean hasOneLabelPerValue() {
+    return labels.size() == values.size();
   }
 
   private ValueAxis createValueAxis() {

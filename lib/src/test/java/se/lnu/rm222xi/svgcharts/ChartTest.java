@@ -294,5 +294,15 @@ class ChartTest {
       assertTrue(svg.contains(">Mån</text>"));
       assertTrue(svg.contains(">&lt;&amp;&gt;</text>"));
     }
+
+    @Test
+    @DisplayName("should give the y-coordinate of the value at an index")
+    void givesVerticalPositionOfValue() {
+      chart.setValues(List.of(0.0, 100.0));
+      LinearScale verticalScale =
+          new LinearScale(new Interval(0, 100), new Interval(360, 40));
+
+      assertEquals(40, chart.verticalPositionOf(1, verticalScale), 1e-9);
+    }
   }
 }
